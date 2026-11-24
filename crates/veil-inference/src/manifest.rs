@@ -50,6 +50,12 @@ fn version(v: &str) -> Option<(u64, u64, u64)> {
     ))
 }
 
+/// Whether a name is a file in the model directory itself: no separators, no drive prefix as
+/// Windows reads `C:model.onnx`, and not `.` or `..`.
+fn plain_file(name: &str) -> bool {
+    !name.is_empty() && name != "." && name != ".." && !name.contains(['/', '\\', ':', '\0'])
+}
+
 impl Manifest {
     pub(crate) fn check(&self, veil_version: &str) -> Result<(), ModelError> {
         if self.format != 1 {
@@ -58,7 +64,7 @@ impl Manifest {
                 self.format
             )));
         }
-        if self.model.file.contains(['/', '\\']) || self.tokenizer.file.contains(['/', '\\']) {
+        if !plain_file(&self.model.file) || !plain_file(&self.tokenizer.file) {
             return Err(ModelError::Manifest(
                 "model and tokenizer files must sit in the model directory".into(),
             ));
@@ -147,6 +153,32 @@ mod tests {
         assert!(matches!(m.check("0.1.0"), Err(ModelError::Labels(_))));
         m.labels = vec!["B-X".into()];
         assert!(matches!(m.check("0.1.0"), Err(ModelError::Labels(_))));
+    }
+
+    #[test]
+    fn refuses_files_outside_the_model_directory() {
+        for name in [
+            "..",
+            ".",
+            "",
+            "../model.onnx",
+            "a/b",
+            "a\\b",
+            "C:model.onnx",
+        ] {
+            let mut m = manifest("0.1.0");
+            m.model.file = name.into();
+            assert!(
+                matches!(m.check("0.1.0"), Err(ModelError::Manifest(_))),
+                "{name:?}"
+            );
+            let mut m = manifest("0.1.0");
+            m.tokenizer.file = name.into();
+            assert!(
+                matches!(m.check("0.1.0"), Err(ModelError::Manifest(_))),
+                "{name:?}"
+            );
+        }
     }
 
     #[test]

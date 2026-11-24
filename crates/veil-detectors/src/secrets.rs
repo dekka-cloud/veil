@@ -22,6 +22,40 @@ pub const SECRET: EntityType = EntityType::new("SECRET");
 /// How far after a private key header to look for its end line.
 const KEY_BLOCK_LIMIT: usize = 16 * 1024;
 
+/// How far a private key's body runs after its header when no end line is in reach, as with
+/// a key cut short or one longer than `KEY_BLOCK_LIMIT`. The body is the lines that look like
+/// PEM (base64, and the `Proc-Type` and `DEK-Info` headers of an encrypted key), so the key
+/// material is covered and the text after it isn't. Body lines share one width and only the
+/// last is shorter, so a shorter line ends the body.
+fn key_body_len(after: &str) -> usize {
+    let base64 = |t: &str| {
+        t.bytes()
+            .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'+' | b'/' | b'='))
+    };
+    let (mut offset, mut end, mut width) = (0, 0, None);
+    for line in after.split_inclusive('\n') {
+        let content = line.trim();
+        let tokens: Vec<&str> = content.split_whitespace().collect();
+        let body = !tokens.is_empty()
+            && tokens.iter().all(|t| base64(t))
+            && (width.is_some() || tokens.iter().any(|t| t.len() >= 16));
+        if body {
+            end = offset + line.trim_end().len();
+            match width {
+                None => width = Some(content.len()),
+                Some(w) if content.len() < w => break,
+                Some(_) => {}
+            }
+        } else if content.starts_with("Proc-Type:") || content.starts_with("DEK-Info:") {
+            end = offset + line.trim_end().len();
+        } else if !content.is_empty() || width.is_some() {
+            break;
+        }
+        offset += line.len();
+    }
+    end
+}
+
 #[derive(Debug)]
 pub struct SecretDetector {
     key_header: Regex,
@@ -206,7 +240,9 @@ impl Detector for SecretDetector {
                                 .map(|j| m.end() + i + j + "PRIVATE KEY-----".len())
                         })
                     })
-                    .unwrap_or(m.end());
+                    .unwrap_or_else(|| {
+                        m.end() + key_body_len(text.get(m.end()..).unwrap_or_default())
+                    });
                 out.push(secret(
                     PRIVATE_KEY,
                     m.start(),
@@ -289,5 +325,56 @@ impl Detector for SecretDetector {
             );
         }
         Ok(out)
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::unwrap_used)]
+mod tests {
+    use super::*;
+
+    // Headers end in an escaped dash so the repository's secret scan passes over them.
+    const BODY: &str = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7VJTUt9Us8cKj\nMzEfYyjiWA4R4/M2bS1GB4t7NXp98C3SC6dVMvDuictGeurT8jNbvJZHtCSuYEvu\nNMoSfm76oqFvAp8Gy0iz5sxjZmSnXyCdPEovGhLa0VzMaQ8s+CLOyS56YyCFGeJZ\nAg==";
+
+    fn key_spans(text: &str) -> Vec<(usize, usize)> {
+        SecretDetector::new()
+            .detect(text, &DetectionContext::default())
+            .unwrap()
+            .iter()
+            .filter(|f| f.entity_type == PRIVATE_KEY)
+            .map(|f| (f.span.start, f.span.end))
+            .collect()
+    }
+
+    #[test]
+    fn a_whole_key_is_covered_through_its_end_line() {
+        let key = format!("-----BEGIN PRIVATE KEY----\x2d\n{BODY}\n-----END PRIVATE KEY----\x2d");
+        let text = format!("here it is: {key} thanks");
+        let start = text.find("-----BEGIN").unwrap();
+        assert_eq!(key_spans(&text), vec![(start, start + key.len())]);
+    }
+
+    #[test]
+    fn a_key_without_its_end_line_is_covered_through_its_body() {
+        let key = format!("-----BEGIN RSA PRIVATE KEY----\x2d\n{BODY}");
+        let text = format!("{key}\n\nThanks, Kofi");
+        assert_eq!(key_spans(&text), vec![(0, key.len())]);
+    }
+
+    #[test]
+    fn an_encrypted_key_without_its_end_line_keeps_its_headers_and_body_covered() {
+        let key = format!(
+            "-----BEGIN RSA PRIVATE KEY----\x2d\nProc-Type: 4,ENCRYPTED\nDEK-Info: AES-128-CBC,3F17F5316E2BAC89\n\n{BODY}"
+        );
+        assert_eq!(key_spans(&format!("{key}\nok")), vec![(0, key.len())]);
+    }
+
+    #[test]
+    fn a_key_whose_end_line_is_out_of_reach_is_covered_up_to_it() {
+        let line = "A".repeat(64);
+        let body = vec![line.as_str(); KEY_BLOCK_LIMIT / 64 + 8].join("\n");
+        let text = format!("-----BEGIN PRIVATE KEY----\x2d\n{body}\n-----END PRIVATE KEY----\x2d");
+        let header = "-----BEGIN PRIVATE KEY----\x2d\n".len();
+        assert_eq!(key_spans(&text), vec![(0, header + body.len())]);
     }
 }

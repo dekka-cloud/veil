@@ -18,6 +18,7 @@ import {
   type Protection,
   VeilError,
   callJson,
+  checkRevision,
   detections,
   modelRepo,
   modelUrl,
@@ -158,7 +159,7 @@ export async function downloadModel(
   { revision = "main", cacheDir: cache }: { revision?: string; cacheDir?: string } = {},
 ): Promise<string> {
   const repo = modelRepo(name);
-  const dir = join(cache ?? cacheDir(), repo.replace("/", "--"), revision);
+  const dir = join(cache ?? cacheDir(), repo.replace("/", "--"), checkRevision(revision).replaceAll("/", "--"));
   mkdirSync(dir, { recursive: true });
   for (const file of ["manifest.yaml", "tokenizer.json", "model.onnx"]) {
     const path = join(dir, file);

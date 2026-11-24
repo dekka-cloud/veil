@@ -39,14 +39,26 @@ impl RestoreMap {
     }
 
     /// Replaces every placeholder in `text` with its value. Placeholders end in `]`, so
-    /// `[X_1]` never matches inside `[X_10]`.
+    /// `[X_1]` never matches inside `[X_10]`. The text is read once, so a restored value
+    /// that happens to look like a placeholder stays as it is.
     pub fn restore(&self, text: &str) -> String {
-        let mut out = text.to_string();
-        for (placeholder, value) in &self.entries {
-            if out.contains(placeholder.as_str()) {
-                out = out.replace(placeholder.as_str(), value);
-            }
+        let longest = self.entries.iter().map(|(p, _)| p.len()).max().unwrap_or(0);
+        let mut out = String::with_capacity(text.len());
+        let mut rest = text;
+        while let Some(open) = rest.find('[') {
+            let (before, tail) = rest.split_at(open);
+            out.push_str(before);
+            let (len, value) = tail
+                .bytes()
+                .take(longest)
+                .position(|c| c == b']')
+                .and_then(|close| tail.get(..=close))
+                .and_then(|p| self.value(p).map(|v| (p.len(), v)))
+                .unwrap_or((1, "["));
+            out.push_str(value);
+            rest = tail.get(len..).unwrap_or_default();
         }
+        out.push_str(rest);
         out
     }
 }
