@@ -167,6 +167,27 @@ fn tokens_are_numbered_per_value_and_restore() {
 }
 
 #[test]
+fn a_restored_value_that_looks_like_a_placeholder_is_not_restored_again() {
+    // The first number's text is itself a placeholder for the second, as a hostile input
+    // could arrange; restoring must not expand it a second time.
+    let text = "Call [GH_MOBILE_NUMBER_2] or 055 765 4321";
+    let findings = vec![phone(5, 25), phone(29, 41)];
+    let out = apply(text, &findings, |_| (Action::Tokenize, None)).unwrap();
+    assert_eq!(
+        out.protected.output.clone().unwrap(),
+        "Call [GH_MOBILE_NUMBER_1] or [GH_MOBILE_NUMBER_2]"
+    );
+    assert_eq!(
+        out.restore.restore("[GH_MOBILE_NUMBER_1]"),
+        "[GH_MOBILE_NUMBER_2]"
+    );
+    assert_eq!(
+        out.restore.restore("[[GH_MOBILE_NUMBER_2]] and [x"),
+        "[055 765 4321] and [x"
+    );
+}
+
+#[test]
 fn decisions_and_results_never_carry_values() {
     let text = concat!("key AK", "IA2E3A7FQB4ZXC6DWY and phone 024 123 4567");
     let findings = vec![key(4, 24), phone(35, 47)];

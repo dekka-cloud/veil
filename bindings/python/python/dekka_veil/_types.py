@@ -7,6 +7,7 @@ is and how sure Veil is, so it's safe to log. Slice the original text with ``sta
 
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any, Literal
@@ -120,6 +121,9 @@ class Protection:
         """
         if self._values is None:
             raise ValueError("this protection holds no values to restore; protect with restore=True")
-        for placeholder, value in self._values.items():
-            text = text.replace(placeholder, value)
-        return text
+        if not self._values:
+            return text
+        # One pass over the text, so a restored value that looks like a placeholder stays as it is.
+        values = self._values
+        pattern = re.compile("|".join(re.escape(p) for p in values))
+        return pattern.sub(lambda m: values[m.group(0)], text)

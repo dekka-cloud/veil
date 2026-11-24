@@ -38,6 +38,8 @@ impl Model {
         let manifest_bytes = read(&dir.join("manifest.yaml"))?;
         let manifest: Manifest = serde_yaml_ng::from_slice(&manifest_bytes)
             .map_err(|e| ModelError::Manifest(e.to_string()))?;
+        // Checked before the files it names are read, so they're read from `dir` only.
+        manifest.check(env!("CARGO_PKG_VERSION"))?;
         let model_bytes = read(&dir.join(&manifest.model.file))?;
         verify(&model_bytes, &manifest.model.sha256, &manifest.model.file)?;
         let tokenizer_bytes = read(&dir.join(&manifest.tokenizer.file))?;

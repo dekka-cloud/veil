@@ -76,6 +76,19 @@ def test_restoring_needs_the_values_to_have_been_kept() -> None:
         out.restore("[EMAIL_ADDRESS_1]")
 
 
+def test_a_restored_value_that_looks_like_a_placeholder_stays_as_it_is() -> None:
+    values = {"[EMAIL_ADDRESS_1]": "[EMAIL_ADDRESS_2]", "[EMAIL_ADDRESS_2]": "ama@example.com"}
+    out = dekka_veil.Protection("x", False, (), "p@1", "rules", (), values)
+    assert out.restore("[EMAIL_ADDRESS_1] and [EMAIL_ADDRESS_2]") == "[EMAIL_ADDRESS_2] and ama@example.com"
+
+
+@pytest.mark.parametrize("revision", ["../../tmp/evil", "..", "/etc", "a//b", "main/..", "a\\b", ""])
+def test_a_revision_cannot_lead_out_of_the_model_cache(tmp_path: Path, revision: str) -> None:
+    with pytest.raises(ValueError, match="isn't a branch, tag or commit"):
+        dekka_veil.download_model("veil-ner-nano", revision=revision, cache=tmp_path)
+    assert list(tmp_path.iterdir()) == []
+
+
 def test_a_policy_file_is_read_from_its_path(tmp_path: Path) -> None:
     path = tmp_path / "policy.yaml"
     path.write_text(TOKENIZE, encoding="utf-8")

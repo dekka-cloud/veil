@@ -4,7 +4,11 @@ import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { describe, it, before } from "node:test";
 
-import { Veil, VeilError, builtinPolicies, countries, entities, validatePolicy } from "../lib/node.js";
+import { mkdtempSync, readdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+import { Protection, Veil, VeilError, builtinPolicies, countries, downloadModel, entities, validatePolicy } from "../lib/node.js";
 
 // A 1 KB test model that tags a handful of words, not trained weights.
 const TINY_MODEL = fileURLToPath(new URL("../../../crates/veil-inference/tests/fixtures/tiny", import.meta.url));
@@ -66,6 +70,20 @@ describe("Veil in Node", () => {
     assert.equal(out.restore("I've written to [EMAIL_ADDRESS_1]."), "I've written to ama@example.com.");
     const kept = await custom.protect("Email ama@example.com");
     assert.throws(() => kept.restore("[EMAIL_ADDRESS_1]"), VeilError);
+  });
+
+  it("leaves a restored value that looks like a placeholder as it is", () => {
+    const values = { "[EMAIL_ADDRESS_1]": "[EMAIL_ADDRESS_2]", "[EMAIL_ADDRESS_2]": "ama@example.com" };
+    const out = new Protection("x", false, [], "p@1", "rules", [], values);
+    assert.equal(out.restore("[EMAIL_ADDRESS_1] and [EMAIL_ADDRESS_2]"), "[EMAIL_ADDRESS_2] and ama@example.com");
+  });
+
+  it("refuses a revision that would lead out of the model cache", async () => {
+    const cacheDir = mkdtempSync(join(tmpdir(), "veil-cache-"));
+    for (const revision of ["../../tmp/evil", "..", "/etc", "a//b", "main/..", "a\\b", ""]) {
+      await assert.rejects(downloadModel("veil-ner-nano", { revision, cacheDir }), VeilError, revision);
+    }
+    assert.deepEqual(readdirSync(cacheDir), []);
   });
 
   it("reports mistakes as VeilError", async () => {

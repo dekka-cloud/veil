@@ -133,11 +133,12 @@ export class Protection {
     if (this.#values === null) {
       throw new VeilError("this protection holds no values to restore; protect with restore: true");
     }
-    let out = text;
-    for (const [placeholder, value] of Object.entries(this.#values)) {
-      out = out.split(placeholder).join(value);
-    }
-    return out;
+    const values = this.#values;
+    const placeholders = Object.keys(values);
+    if (placeholders.length === 0) return text;
+    // One pass over the text, so a restored value that looks like a placeholder stays as it is.
+    const pattern = new RegExp(placeholders.map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"), "g");
+    return text.replace(pattern, (placeholder) => values[placeholder]!);
   }
 }
 
@@ -262,8 +263,19 @@ export function modelRepo(model: string): string {
   return repo;
 }
 
+// A branch, tag or commit: segments of letters, digits, dots, dashes and underscores, as in
+// `main`, a commit hash or `refs/pr/1`, so a revision can't climb out of the model cache.
+const REVISION = /^[A-Za-z0-9][A-Za-z0-9._-]*(?:\/[A-Za-z0-9][A-Za-z0-9._-]*)*$/;
+
+export function checkRevision(revision: string): string {
+  if (revision.length > 255 || !REVISION.test(revision)) {
+    throw new VeilError(`${JSON.stringify(revision)} isn't a branch, tag or commit`);
+  }
+  return revision;
+}
+
 export function modelUrl(repo: string, revision: string, file: string): string {
-  return `https://huggingface.co/${repo}/resolve/${encodeURIComponent(revision)}/${file}`;
+  return `https://huggingface.co/${repo}/resolve/${encodeURIComponent(checkRevision(revision))}/${file}`;
 }
 
 /** Wraps an engine error so callers can catch `VeilError`. */
