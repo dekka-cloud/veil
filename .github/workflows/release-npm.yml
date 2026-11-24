@@ -5,6 +5,8 @@ name: release-npm
 # main package. A run started by hand only builds, unless `publish` is ticked; pushing a
 # version tag such as v0.1.0 publishes. Publishing uses npm's trusted publishing with
 # provenance, so no token is stored once each package has this workflow as its publisher.
+# npm only lets a package that exists trust a workflow, so the first release publishes with
+# an NPM_TOKEN secret in the npm environment, which is deleted afterwards.
 
 on:
   workflow_dispatch:
@@ -95,12 +97,22 @@ jobs:
     defaults:
       run:
         working-directory: bindings/js
+    env:
+      # napi publishes the platform packages with a plain `npm publish`, so access and
+      # provenance are set here for every package rather than on the command line.
+      NPM_CONFIG_ACCESS: public
+      NPM_CONFIG_PROVENANCE: "true"
+      # Only for a package's first publish, before npm lets it name this workflow as its
+      # trusted publisher. Delete the secret once all six packages trust the workflow.
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 22
+          # Trusted publishing needs npm 11.5.1 or later, which ships with Node 24.
+          node-version: 24
           registry-url: https://registry.npmjs.org
+      - run: npm --version
       - run: npm ci
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
@@ -113,5 +125,5 @@ jobs:
           path: bindings/js/artifacts
       - run: npx napi create-npm-dirs
       - run: npx napi artifacts --output-dir artifacts --npm-dir npm
-      - run: npx napi pre-publish --npm-dir npm --tag-style npm
-      - run: npm publish --provenance --access public
+      - run: npx napi pre-publish --npm-dir npm --tag-style npm --no-gh-release
+      - run: npm publish
