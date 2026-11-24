@@ -1,0 +1,23 @@
+# A test fixture, not a real model: see tests/fixtures/make_tiny.py.
+format: 1
+id: veil-ner-tiny
+version: 0.0.1
+model:
+  file: model.onnx
+  sha256: 4e55898f8039daa992231567bb7400c3f05601637f5687d2e6978bc28b48f524
+tokenizer:
+  file: tokenizer.json
+  sha256: 8392acf5b322bd5c5bee020c95095ece3744a3f0e55f1a7fc4dc406da798a6dd
+  max_length: 8
+  stride: 2
+labels:
+  - O
+  - B-PERSON_NAME
+  - I-PERSON_NAME
+  - B-ADDRESS
+  - I-ADDRESS
+  - B-GH_MOBILE_NUMBER
+  - I-GH_MOBILE_NUMBER
+threshold: 0.5
+runtime:
+  veil: 0.1.0

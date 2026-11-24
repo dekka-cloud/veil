@@ -1,0 +1,4 @@
+# Pick dependency versions that support the workspace's rust-version, so the engine and its
+# bindings build on the oldest toolchain they declare.
+[resolver]
+incompatible-rust-versions = "fallback"

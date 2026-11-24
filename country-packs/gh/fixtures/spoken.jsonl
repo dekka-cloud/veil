@@ -1,0 +1,13 @@
+{"text": "My number is zero two four one two three four five six seven.", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "zero two four one two three four five six seven"}], "note": "a mobile number read digit by digit"}
+{"text": "Call me on oh five five, double four, one two, triple seven", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "oh five five, double four, one two, triple seven"}], "note": "oh for zero, double and triple, commas between groups"}
+{"text": "Send the momo to 024 one two three four five six seven please", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "024 one two three four five six seven", "labels": ["MOBILE_MONEY"]}], "note": "a figure group followed by digit words, used as a wallet"}
+{"text": "It's plus two three three two four one two three four five six seven", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "plus two three three two four one two three four five six seven"}], "note": "the country code read aloud"}
+{"text": "Me nɔma ne hwee abien anan baako mmienu mmiɛnsa ɛnan anum nsia nson", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "hwee abien anan baako mmienu mmiɛnsa ɛnan anum nsia nson"}], "note": "Twi digit words, CLDR and Asante forms mixed"}
+{"text": "Frɛ ɖekeo eve ene ɖeka eve etɔ̃ ene atɔ̃ ade adre", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "ɖekeo eve ene ɖeka eve etɔ̃ ene atɔ̃ ade adre"}], "note": "Ewe digit words, with a combining tilde"}
+{"text": "My house line is zero three zero two one two three four five six.", "expect": [{"entity": "GH_LANDLINE_NUMBER", "value": "zero three zero two one two three four five six"}], "note": "a home landline read aloud"}
+{"text": "Call the hospital on zero three zero two one two three four five six for enquiries.", "expect": [], "note": "an organisation's line read aloud isn't personal"}
+{"text": "I bought one two three four five six seven eight nine ten oranges", "expect": [], "note": "counting that doesn't spell a Ghanaian number"}
+{"text": "Zero two four one two three four five six", "expect": [], "note": "nine digits are one short of a number"}
+{"text": "Eve said one two three, oh, four five six seven eight nine", "expect": [], "note": "digit words that start with neither a trunk 0 nor the country code"}
+{"text": "zero two four one two three four five six seven eight", "expect": [], "note": "eleven digits aren't a Ghanaian number"}
+{"text": "Room 12 zero two four one two three four five six seven", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "zero two four one two three four five six seven"}], "note": "a figure just before a spoken number is left out of it"}

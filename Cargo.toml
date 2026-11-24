@@ -1,0 +1,60 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/veil-core",
+    "crates/veil-detectors",
+    "crates/veil-policy",
+    "crates/veil-country-packs",
+    "crates/veil",
+    "crates/veil-inference",
+    "bindings/python",
+    "bindings/js/native",
+    "bindings/js/wasm",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.88"
+repository = "https://github.com/dekka-cloud/veil"
+license = "Apache-2.0"
+publish = false
+
+[workspace.dependencies]
+veil-core = { path = "crates/veil-core" }
+veil-detectors = { path = "crates/veil-detectors" }
+veil-policy = { path = "crates/veil-policy" }
+veil-country-packs = { path = "crates/veil-country-packs" }
+veil = { path = "crates/veil", default-features = false }
+veil-inference = { path = "crates/veil-inference", default-features = false }
+regex = { version = "1.11", default-features = false, features = ["std", "unicode-perl", "unicode-case"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+toml = "0.8"
+# serde_yaml was archived in 2024; serde_yaml_ng is its maintained continuation with the
+# same API, and builds on Rust 1.84.
+serde_yaml_ng = "0.10"
+serde_path_to_error = "0.1"
+proptest = "1.6"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_debug_implementations = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+unwrap_used = "warn"
+expect_used = "warn"
+panic = "warn"
+indexing_slicing = "warn"
+
+# Optimise dependencies such as regex in debug and test builds, while Veil's own crates
+# stay unoptimised with debug assertions. Unoptimised regex is about 40 times slower,
+# enough to break the adversarial timing tests on CI runners.
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

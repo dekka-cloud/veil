@@ -1,0 +1,26 @@
+{"text": "My TIN is P0012345678.", "expect": [{"entity": "GH_TAX_IDENTIFIER", "value": "P0012345678"}], "note": "personal TIN with context"}
+{"text": "Supplier C0012345678 invoiced us", "expect": [{"entity": "GH_TAX_IDENTIFIER", "value": "C0012345678"}], "note": "company TIN without context"}
+{"text": "Code P001234567 is short", "expect": [], "note": "TIN one digit short"}
+{"text": "Ref XP0012345678 sent", "expect": [], "note": "TIN glued to a letter"}
+{"text": "Order A0012345678 shipped", "expect": [], "note": "unknown TIN prefix"}
+{"text": "Car GR 1234-23 parked outside", "expect": [{"entity": "GH_VEHICLE_REGISTRATION", "value": "GR 1234-23"}], "note": "Greater Accra plate"}
+{"text": "The taxi AS 567-19 left", "expect": [{"entity": "GH_VEHICLE_REGISTRATION", "value": "AS 567-19"}], "note": "Ashanti plate"}
+{"text": "Police car GP 1234-20 arrived", "expect": [], "note": "state vehicle codes are excluded"}
+{"text": "Room ZZ 12-34 booked", "expect": [], "note": "unknown region code"}
+{"text": "Score GR 1234 23 recorded", "expect": [], "note": "no hyphen before the year"}
+{"text": "Pay into account number 1234567890123 at GCB", "expect": [{"entity": "BANK_ACCOUNT_NUMBER", "value": "1234567890123"}], "note": "bank account with context"}
+{"text": "Reference 1234567890123 attached", "expect": [], "note": "digit run without account context"}
+{"text": "Passport no G1234567, issued 2020", "expect": [{"entity": "GH_PASSPORT_NUMBER", "value": "G1234567"}], "note": "passport with context"}
+{"text": "Seat G1234567 is free", "expect": [], "note": "passport shape without context"}
+{"text": "My voter ID is 1234567890", "expect": [{"entity": "GH_VOTER_ID", "value": "1234567890"}], "note": "voter ID with context"}
+{"text": "My voter ID is 0241234567", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "0241234567"}], "note": "a valid phone number wins over an unverified voter ID"}
+{"text": "Batch 1234567890 printed", "expect": [], "note": "ten digits without voter context"}
+{"text": "SSNIT number GHA-723451904-3 on file", "expect": [{"entity": "GH_GHANA_CARD_PIN", "value": "GHA-723451904-3", "labels": ["SSNIT"]}], "note": "Ghana Card used as SSNIT number"}
+{"text": "NHIS card GHA-723451904-3 for the patient", "expect": [{"entity": "GH_GHANA_CARD_PIN", "value": "GHA-723451904-3", "labels": ["HEALTH"]}], "note": "Ghana Card in health context"}
+{"text": "Destination GHA-723451904-3 reached", "expect": [{"entity": "GH_GHANA_CARD_PIN", "value": "GHA-723451904-3", "labels": []}], "note": "tin inside destination isn't tax context"}
+{"text": "A Metro Mass bus, GR 4512-19, was involved in a crash near Kintampo, police said.", "expect": [], "note": "public bus in an accident report"}
+{"text": "The tanker with registration number AS 2231-21 overturned on the highway.", "expect": [], "note": "tanker in a news report"}
+{"text": "Eyewitnesses said the trotro GT 908-17 collided with a taxi.", "expect": [], "note": "accident report"}
+{"text": "My car GR 1234-23 was towed from Osu this morning.", "expect": [{"entity": "GH_VEHICLE_REGISTRATION", "value": "GR 1234-23"}], "note": "personal plate"}
+{"text": "Police said the vehicle GE 4410-22 is registered to a trader in Madina.", "expect": [{"entity": "GH_VEHICLE_REGISTRATION", "value": "GE 4410-22"}], "note": "a news report that ties the plate to a person"}
+{"text": "Vehicle AK 77-20 is owned by my uncle.", "expect": [{"entity": "GH_VEHICLE_REGISTRATION", "value": "AK 77-20"}], "note": "ownership wins over the word vehicle"}

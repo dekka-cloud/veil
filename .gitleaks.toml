@@ -1,0 +1,14 @@
+# Veil's tests feed its credential detectors synthetic credentials, so the scan skips the
+# files that hold them. Partner-format values in them are also written with an escaped
+# character or assembled at compile time, so GitHub's secret scanning doesn't see real-looking
+# tokens either. Everything else is scanned with gitleaks' default rules.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Synthetic credentials that test Veil's own detectors"
+paths = [
+  '''^tests/fixtures/secrets\.jsonl$''',
+  '''^policies/[^/]+\.cases\.jsonl$''',
+  '''^crates/veil-[a-z-]+/tests/[^/]+\.rs$''',
+]

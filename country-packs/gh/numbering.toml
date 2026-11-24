@@ -1,0 +1,47 @@
+# Ghana telephone numbering used by gh-phone-v1.
+#
+# The patterns are vendored from Google's libphonenumber metadata (Apache-2.0, see
+# THIRD_PARTY.md), territory GH, release v9.0.42 of 2026-10-27. They match a national
+# significant number (NSN): nine digits, written domestically with a trunk 0
+# (0XX XXX XXXX) or internationally with +233 / 00233 and no 0. Update by re-vendoring
+# from a newer release, never by hand-editing the patterns.
+#
+# Mobile number portability applies in Ghana, so a prefix doesn't prove the current
+# network, and Veil doesn't report one.
+
+country_code = "233"
+nsn_length = 9
+source = "libphonenumber PhoneNumberMetadata.xml, territory GH"
+source_version = "v9.0.42"
+source_date = "2026-10-27"
+checked = "2026-11-04"
+
+mobile_pattern = '(?:2(?:[0346-9]\d|5[67])|5(?:[03-7]\d|9[1-9]))\d{6}'
+fixed_line_pattern = '3(?:181[0-5]|285[0-7]|3810)\d{4}|3(?:0(?:[237-9]\d|60)|[167](?:2[0-6]|7\d|80)|2(?:2[0-5]|7\d|8[0-4])|3(?:2[0-3]|7\d|80)|4(?:2[013-9]|3[01]|7\d|80)|5(?:2[0-7]|7\d|80)|8(?:2[0-2]|7\d|80)|9(?:[28]0|7\d))\d{5}'
+
+# Veil's own context words, not libphonenumber's. Under the annotation guidelines an
+# organisation's switchboard, customer-care or studio line isn't personal information, so a
+# fixed-line number whose sentence names an organisation or a public line (`public_context`)
+# isn't reported, unless the same sentence ties it to a person (`owner_context`), which always
+# wins. Mobile numbers are never suppressed this way: people use their own mobiles for
+# business, and missing a personal number costs more than flagging a shop's. Words match whole
+# words, within 80 bytes of the number and the same sentence, case-insensitively.
+public_context = [
+    "call us", "contact us", "reach us", "our office", "our line", "our lines", "our number", "our numbers",
+    "head office", "office", "branch", "headquarters", "switchboard", "reception", "front desk",
+    "customer care", "customer service", "customer services", "client service", "call centre", "call center",
+    "hotline", "helpline", "help line", "toll-free", "toll free", "enquiries", "enquiry", "inquiries", "inquiry",
+    "studio", "studio line", "fax", "opening hours", "weekdays", "between monday and friday",
+    "ltd", "limited", "plc", "company", "enterprise", "enterprises", "bank", "hospital", "clinic", "polyclinic",
+    "pharmacy", "mall", "airport", "stadium", "hotel", "restaurant", "authority", "ministry", "assembly",
+    "commission", "council", "service", "agency", "university", "college", "school", "church", "mosque",
+    "station", "fm", "radio", "tv", "embassy", "high commission", "relationship manager", "account officer",
+]
+owner_context = [
+    "my", "me", "mine", "i", "i'm", "his", "her", "their", "personal", "private", "house", "home", "residence",
+    "house line", "house phone", "home line", "home phone", "landlord", "landlady", "mum", "mother", "father", "dad",
+    "sister", "brother", "wife", "husband", "son", "daughter", "auntie", "aunt", "uncle", "grandma", "grandpa",
+    "next of kin", "ask for", "registered to", "in the name of", "belongs to",
+    # Twi and Ga for "my": "me nɔma" (my number), "me fie" (my house), "mi" (Ga).
+    "mi", "me fie", "me nɔma",
+]

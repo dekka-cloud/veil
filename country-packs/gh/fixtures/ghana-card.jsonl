@@ -1,0 +1,12 @@
+{"text": "My Ghana Card PIN is GHA-723451904-3", "expect": [{"entity": "GH_GHANA_CARD_PIN", "value": "GHA-723451904-3"}], "note": "canonical form"}
+{"text": "ID: gha-123456789-0, please verify", "expect": [{"entity": "GH_GHANA_CARD_PIN", "value": "gha-123456789-0"}], "note": "lower case"}
+{"text": "Ghana card number GHA7234519043", "expect": [{"entity": "GH_GHANA_CARD_PIN", "value": "GHA7234519043"}], "note": "no separators"}
+{"text": "NIA PIN GHA 723451904 3 on file", "expect": [{"entity": "GH_GHANA_CARD_PIN", "value": "GHA 723451904 3"}], "note": "spaces"}
+{"text": "Ticket GHA-12345-6 opened", "expect": [], "note": "too few digits"}
+{"text": "Code XGHA-723451904-3X", "expect": [], "note": "glued to other letters"}
+{"text": "Flight GHA7234 lands at 10", "expect": [], "note": "flight-like code"}
+{"text": "Ref GHA-7234519043-1 sent", "expect": [], "note": "ten digits in the body"}
+{"text": "Ghana Card GHA-12345678-K issued in 2019", "expect": [{"entity": "GH_GHANA_CARD_PIN", "value": "GHA-12345678-K"}], "note": "8-digit body with a letter check character"}
+{"text": "Non-citizen Ghana Card NGA-123456789-5 on file", "expect": [{"entity": "GH_GHANA_CARD_PIN", "value": "NGA-123456789-5"}], "note": "non-citizen prefix with context"}
+{"text": "Order ABC-123456789-1 dispatched", "expect": [], "note": "three-letter reference without Ghana Card context"}
+{"text": "Order GHA-1234567-1 dispatched", "expect": [], "note": "seven digits is too short"}

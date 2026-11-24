@@ -1,0 +1,25 @@
+# Veil's built-in policy for text leaving your systems, such as a prompt sent to an
+# external AI model. Credentials and Ghana Card PINs block the request outright, phone
+# numbers are masked so a person can still recognise them, and everything else Veil finds
+# is replaced with a typed placeholder.
+version: 1
+name: default-protection
+revision: "2026-11-04"
+on_failure: closed
+default_action: redact
+
+rules:
+  - id: block-credentials
+    match:
+      categories: [CREDENTIAL]
+    action: block
+
+  - id: block-ghana-card
+    match:
+      entity_types: [GH_GHANA_CARD_PIN]
+    action: block
+
+  - id: mask-phone-numbers
+    match:
+      entity_types: [GH_MOBILE_NUMBER, GH_LANDLINE_NUMBER]
+    action: mask

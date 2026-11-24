@@ -1,0 +1,35 @@
+[package]
+name = "veil-inference"
+description = "Runs Dekka Veil's contextual model: tokenising, windowing and decoding, with ONNX Runtime in-process"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+veil-core.workspace = true
+serde.workspace = true
+serde_yaml_ng.workspace = true
+thiserror.workspace = true
+ort = { version = "=2.0.0-rc.10", default-features = false, features = ["std", "download-binaries"], optional = true }
+tokenizers = { version = "0.21", default-features = false, features = ["fancy-regex"] }
+sha2 = "0.10"
+
+[features]
+default = ["onnxruntime"]
+# Runs the graph in-process through ONNX Runtime. Without it the crate still tokenises, plans
+# windows and decodes logits, for hosts that run the graph themselves.
+onnxruntime = ["dep:ort"]
+# Builds the tokenizer for WebAssembly.
+wasm = ["tokenizers/unstable_wasm"]
+
+[dev-dependencies]
+serde_json.workspace = true
+
+[lints]
+workspace = true
+
+[[test]]
+name = "tiny"
+required-features = ["onnxruntime"]

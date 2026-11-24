@@ -1,0 +1,89 @@
+{
+  "name": "dekka-veil",
+  "version": "0.1.0",
+  "description": "Find and protect personal information in text, with Ghana-aware rules and an optional local model, in Node.js and the browser",
+  "license": "Apache-2.0",
+  "author": "Dekka",
+  "homepage": "https://dekka.cloud/veil",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dekka-cloud/veil.git",
+    "directory": "bindings/js"
+  },
+  "bugs": "https://github.com/dekka-cloud/veil/issues",
+  "keywords": [
+    "pii",
+    "privacy",
+    "redaction",
+    "anonymization",
+    "data-protection",
+    "ghana",
+    "ner",
+    "wasm"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "node": {
+        "types": "./lib/node.d.ts",
+        "default": "./lib/node.js"
+      },
+      "browser": {
+        "types": "./lib/browser.d.ts",
+        "default": "./lib/browser.js"
+      },
+      "default": {
+        "types": "./lib/browser.d.ts",
+        "default": "./lib/browser.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./lib/node.d.ts",
+  "files": [
+    "lib",
+    "native/binding.cjs",
+    "native/binding.d.cts",
+    "wasm/pkg/veil_wasm.js",
+    "wasm/pkg/veil_wasm.d.ts",
+    "wasm/pkg/veil_wasm_bg.wasm",
+    "wasm/pkg/veil_wasm_bg.wasm.d.ts",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "napi": {
+    "binaryName": "veil",
+    "packageName": "@dekka/veil",
+    "targets": [
+      "x86_64-unknown-linux-gnu",
+      "aarch64-unknown-linux-gnu",
+      "x86_64-apple-darwin",
+      "aarch64-apple-darwin",
+      "x86_64-pc-windows-msvc"
+    ]
+  },
+  "peerDependencies": {
+    "onnxruntime-web": "^1.22.0"
+  },
+  "peerDependenciesMeta": {
+    "onnxruntime-web": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "build:native": "napi build --platform --release --manifest-path native/Cargo.toml --output-dir native --js binding.cjs --dts binding.d.cts",
+    "build:wasm": "sh wasm/build.sh",
+    "build:ts": "tsc -p tsconfig.json",
+    "build": "npm run build:native && npm run build:wasm && npm run build:ts",
+    "test": "node --test \"test/**/*.test.js\""
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.0.0",
+    "@types/node": "^22.0.0",
+    "onnxruntime-web": "^1.22.0",
+    "typescript": "^5.6.0"
+  }
+}

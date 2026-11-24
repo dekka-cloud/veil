@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Veil in the browser</title>
+    <!-- onnxruntime-web runs the model. A bundler resolves it from npm; here it comes from a CDN. -->
+    <script type="importmap">
+      { "imports": { "onnxruntime-web": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.31.1/dist/ort.bundle.min.mjs" } }
+    </script>
+    <style>
+      body { font: 16px/1.5 system-ui, sans-serif; max-width: 46rem; margin: 3rem auto; padding: 0 1.25rem; color: #1a1a1a; }
+      textarea { width: 100%; min-height: 7rem; font: inherit; padding: 0.75rem; box-sizing: border-box; }
+      button { font: inherit; padding: 0.5rem 1rem; margin-top: 0.75rem; }
+      output { display: block; white-space: pre-wrap; padding: 0.75rem; background: #f4f4f2; margin-top: 1rem; min-height: 3rem; }
+      table { border-collapse: collapse; margin-top: 1rem; width: 100%; font-size: 14px; }
+      td, th { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid #e4e4e0; }
+      #status { color: #555; font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <h1>Veil in the browser</h1>
+    <p>
+      Veil finds personal information in the text below and protects it on this device. The rules start at once, and the
+      contextual model, which finds names and addresses, downloads once from Hugging Face and then runs here too.
+    </p>
+    <textarea id="input">Me din de Akosua Mensah, patient PT-204118. Frɛ me wɔ 024 412 3456 anaa ama@example.com.</textarea>
+    <button id="protect" disabled>Protect</button>
+    <p id="status">Loading Veil…</p>
+    <output id="output"></output>
+    <table id="decisions" hidden>
+      <thead><tr><th>Found</th><th>What it is</th><th>What happened</th><th>Confidence</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <script type="module">
+      import { Veil } from "../../bindings/js/lib/browser.js";
+
+      const $ = (id) => document.getElementById(id);
+      let veil = await Veil.load({ country: "GH" });
+      $("protect").disabled = false;
+      $("status").textContent = "Rules ready. Downloading the model…";
+
+      async function protect() {
+        const text = $("input").value;
+        const started = performance.now();
+        const out = await veil.protect(text);
+        const ms = (performance.now() - started).toFixed(1);
+        $("output").textContent = out.blocked ? "Blocked by the policy." : out.text;
+        const rows = out.decisions.map(
+          (d) => `<tr><td>${escape(text.slice(d.start, d.end))}</td><td>${d.entityType}</td><td>${d.action}</td><td>${d.confidence.toFixed(2)}</td></tr>`,
+        );
+        $("decisions").querySelector("tbody").innerHTML = rows.join("");
+        $("decisions").hidden = rows.length === 0;
+        $("status").textContent = `${out.profile === "rules" ? "Rules" : "Rules and model"}, ${ms} ms on this device.`;
+      }
+
+      function escape(s) {
+        return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+      }
+
+      $("protect").addEventListener("click", protect);
+      await protect();
+      Veil.load({ country: "GH", model: "veil-ner-nano" })
+        .then(async (withModel) => {
+          veil = withModel;
+          await protect();
+        })
+        .catch((e) => ($("status").textContent = `The model couldn't load: ${e.message}`));
+    </script>
+  </body>
+</html>

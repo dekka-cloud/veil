@@ -1,0 +1,66 @@
+# Digit words for phone numbers read aloud, read by gh::spoken (gh-phone-spoken-v1).
+#
+# Speech transcripts and voice notes write numbers the way people say them: "zero two four,
+# one two three…" or "oh five five double four…", and in Ghanaian languages with their own
+# digit words. `digits[d]` lists the words for digit d. A run of these words counts only when
+# it spells a whole Ghanaian number that the numbering plan accepts, so a word that is also an
+# everyday word (Ewe "eve", English "oh") can't produce a finding alone.
+#
+# Every word has a published source. CLDR's spell-out rules (Unicode License v3) give Akan and
+# Ewe digit words; where Asante Twi counts with other forms, they're attested in Common Voice's
+# CC0 Twi sentence collection. Nothing here was invented; a language whose digits have no
+# source is left out until one is found.
+
+[[language]]
+code = "en"
+source = "English digit names; 'oh' and 'nought' for zero as read aloud in Ghanaian and British English"
+digits = [
+    ["zero", "oh", "o", "nought"],
+    ["one"],
+    ["two"],
+    ["three"],
+    ["four"],
+    ["five"],
+    ["six"],
+    ["seven"],
+    ["eight"],
+    ["nine"],
+]
+repeat = { double = 2, triple = 3 }
+plus = ["plus"]
+
+# Akan: Asante and Akuapem Twi, and Fante. The first form of each digit is CLDR's Akan
+# spell-out (common/rbnf/ak.xml); the others are Asante Twi counting forms found in Common
+# Voice's Twi sentences (server/data/tw/sentence-collector.txt, CC0).
+[[language]]
+code = "ak"
+source = "CLDR rbnf/ak.xml (unicode-org/cldr main, read 2026-11-05) spellout-cardinal; Asante counting forms attested in Common Voice Twi sentences (CC0)"
+digits = [
+    ["hwee", "ohwee"],
+    ["koro", "baako", "biako"],
+    ["abien", "mmienu", "abienu"],
+    ["abiasa", "mmiɛnsa", "abiɛsa"],
+    ["anan", "ɛnan"],
+    ["anum", "enum"],
+    ["asia", "nsia"],
+    ["asuon", "nson", "ason"],
+    ["awɔtwe", "nwɔtwe"],
+    ["akron", "nkron"],
+]
+
+# Ewe: CLDR's Ewe spell-out (common/rbnf/ee.xml), with both spellings it gives for one.
+[[language]]
+code = "ee"
+source = "CLDR rbnf/ee.xml (unicode-org/cldr main, read 2026-11-05) spellout-cardinal and spellout-base"
+digits = [
+    ["ɖekeo"],
+    ["ɖeka", "ɖekɛ"],
+    ["eve"],
+    ["etɔ̃"],
+    ["ene"],
+    ["atɔ̃"],
+    ["ade"],
+    ["adre"],
+    ["enyi"],
+    ["asieke"],
+]

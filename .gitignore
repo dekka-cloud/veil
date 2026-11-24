@@ -1,0 +1,25 @@
+/target
+*.onnx
+# The tiny test fixture is a 1 KB lookup table, not trained weights (see make_tiny.py).
+!crates/veil-inference/tests/fixtures/tiny/model.onnx
+/models/artifacts/
+.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.so
+*.pyd
+dist/
+.pytest_cache/
+
+# JavaScript
+node_modules/
+*.node
+bindings/js/lib/
+bindings/js/wasm/pkg/
+
+# WebAssembly builds made in a container
+/target-wasm/

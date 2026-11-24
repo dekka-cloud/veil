@@ -1,0 +1,27 @@
+# Ghana Card PIN format used by gh-ghana-card-v1.
+#
+# The PIN has three hyphen-separated parts: the ISO 3166 alpha-3 code of the holder's
+# nationality at first registration (GHA for citizens, another code on a non-citizen
+# card), an 8- or 9-digit number, and one check character, a digit or a letter. The check
+# character's algorithm is internal to the NIA and unpublished, so the detector reports
+# VALID_FORMAT and never VALID. Source: Ghana Revenue Authority's TIN
+# filing to the OECD; see identifiers.yaml in this directory.
+#
+# The PIN is also the holder's TIN (since 1 April 2021) and SSNIT number (since June
+# 2021), so it is reported as GH_GHANA_CARD_PIN whichever name the text uses.
+
+citizen_prefix = "GHA"
+body_digits_min = 8
+body_digits_max = 9
+source = "https://www.oecd.org/content/dam/oecd/en/topics/policy-issue-focus/aeoi/ghana-tin.pdf"
+checked = "2026-11-04"
+
+# Words that raise confidence, and that a non-citizen prefix needs nearby.
+context = ["ghana card", "ghanacard", "nia", "national id", "national identification", "id number", "id no", "pin", "tin", "ssnit", "card no", "card number", "non-citizen", "resident card"]
+
+# Words near a PIN that say what it's being used as. The PIN is also the TIN and the SSNIT
+# number, and NHIS membership is being linked to it (identifiers.yaml).
+[labels]
+SSNIT = ["ssnit", "social security", "pension", "tier 1", "tier one"]
+TAX = ["tin", "tax", "taxpayer", "gra", "revenue authority"]
+HEALTH = ["nhis", "nhia", "health insurance", "hospital", "clinic", "patient"]

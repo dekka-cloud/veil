@@ -1,0 +1,123 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+
+# Once this repository is public, every job runs on GitHub-hosted runners, because a pull
+# request from a fork must never run on a self-hosted machine. While it's private, jobs use
+# Dekka's own runners instead.
+jobs:
+  rust:
+    runs-on: ${{ github.event.repository.private && fromJSON('["self-hosted", "linux", "x64"]') || 'ubuntu-24.04' }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> "$GITHUB_PATH"
+      - uses: dtolnay/rust-toolchain@df2a88e9fe4098bad09cb42c3dec7187f15861fc # master
+        with:
+          toolchain: "1.99"
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        if: ${{ !github.event.repository.private }}
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: The model runtime builds without ONNX Runtime, as WebAssembly needs
+        run: cargo clippy -p veil-inference --no-default-features --all-targets -- -D warnings
+      - run: cargo test --workspace
+      - name: Each library ships the repository's licence and notice
+        run: |
+          for dir in bindings/python bindings/js; do
+            cmp LICENSE "$dir/LICENSE" && cmp NOTICE "$dir/NOTICE"
+          done
+
+  python:
+    runs-on: ${{ github.event.repository.private && fromJSON('["self-hosted", "linux", "x64"]') || 'ubuntu-24.04' }}
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        python: ["3.10", "3.14"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> "$GITHUB_PATH"
+      - uses: dtolnay/rust-toolchain@df2a88e9fe4098bad09cb42c3dec7187f15861fc # master
+        with:
+          toolchain: "1.99"
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        if: ${{ !github.event.repository.private }}
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ matrix.python }}
+      - working-directory: bindings/python
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install --quiet maturin pytest
+          .venv/bin/maturin develop --release
+          .venv/bin/pytest -q
+
+  javascript:
+    runs-on: ${{ github.event.repository.private && fromJSON('["self-hosted", "linux", "x64"]') || 'ubuntu-24.04' }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> "$GITHUB_PATH"
+      - uses: dtolnay/rust-toolchain@df2a88e9fe4098bad09cb42c3dec7187f15861fc # master
+        with:
+          toolchain: "1.99"
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        if: ${{ !github.event.repository.private }}
+      # The CLI must match the wasm-bindgen crate in Cargo.lock exactly.
+      - id: bindgen
+        run: echo "version=$(cargo metadata --format-version 1 --locked | jq -r '.packages[] | select(.name == "wasm-bindgen") | .version')" >> "$GITHUB_OUTPUT"
+      - uses: taiki-e/install-action@fe3acb53a98b62c772db35de75ce0e4595e7ca8c # v2.90.8
+        with:
+          tool: wasm-bindgen@${{ steps.bindgen.outputs.version }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - working-directory: bindings/js
+        run: |
+          npm ci
+          npm run build
+          npm test
+
+  secrets:
+    runs-on: ${{ github.event.repository.private && fromJSON('["self-hosted", "linux", "x64"]') || 'ubuntu-24.04' }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      # Scans every commit with a pinned, checksum-verified gitleaks. The test fixtures write
+      # credential-shaped values with an escaped character, so they don't trip it.
+      - name: Scan the history for secrets
+        run: |
+          set -euo pipefail
+          tool=$RUNNER_TEMP/gitleaks
+          curl -sSfL -o "$tool.tgz" https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz
+          echo "a65b5253807a68ac0cafa4414031fd740aeb55f54fb7e55f386acb52e6a840eb  $tool.tgz" | sha256sum -c -
+          tar -xzf "$tool.tgz" -C "$RUNNER_TEMP" gitleaks
+          "$tool" git . --redact --no-banner --verbose
+
+  audit:
+    runs-on: ${{ github.event.repository.private && fromJSON('["self-hosted", "linux", "x64"]') || 'ubuntu-24.04' }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> "$GITHUB_PATH"
+      - uses: taiki-e/install-action@fe3acb53a98b62c772db35de75ce0e4595e7ca8c # v2.90.8
+        with:
+          tool: cargo-audit
+      - run: cargo audit

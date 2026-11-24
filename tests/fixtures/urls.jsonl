@@ -1,0 +1,6 @@
+{"text": "open https://example.com/pay?phone=0241234567&ref=1", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "0241234567"}], "note": "a phone number in a URL is reported as the phone number"}
+{"text": "callback https://app.example.com/cb?code=4f9a8b7c6d5e&state=xyz", "expect": [{"entity": "URL_CREDENTIAL", "value": "4f9a8b7c6d5e"}], "note": "OAuth code parameter"}
+{"text": "see https://example.com/u?name=Kwame%20Mensah&page=2.", "expect": [{"entity": "URL_PERSONAL_DATA", "value": "Kwame%20Mensah"}], "note": "personal parameter, trailing full stop"}
+{"text": "link https://example.com/search?q=accra&page=2", "expect": [], "note": "ordinary query parameters"}
+{"text": "https://example.com/path/without/query", "expect": [], "note": "no query string"}
+{"text": "https://example.com/?email=", "expect": [], "note": "empty value"}

@@ -1,0 +1,33 @@
+{"text": "Please call 024 123 4567", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "024 123 4567"}], "note": "spaced national mobile"}
+{"text": "My number is 0551234567.", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "0551234567"}], "note": "unspaced national mobile before a full stop"}
+{"text": "Reach me on +233 20 123 4567 any time", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "+233 20 123 4567"}], "note": "international with spaces"}
+{"text": "WhatsApp: +233241234567", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "+233241234567"}], "note": "international, no separators"}
+{"text": "Dial 00233 26 123 4567 from abroad", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "00233 26 123 4567"}], "note": "00 international prefix"}
+{"text": "Call +233 (0)24 123 4567 please", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "+233 (0)24 123 4567"}], "note": "trunk zero kept in brackets"}
+{"text": "Number: 054-123-4567", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "054-123-4567"}], "note": "hyphenated"}
+{"text": "Tel. 059.123.4567", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "059.123.4567"}], "note": "dotted"}
+{"text": "(027) 123 4567 is my AT line", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "(027) 123 4567"}], "note": "bracketed prefix"}
+{"text": "233501234567 is on Telecel", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "233501234567"}], "note": "country code without plus"}
+{"text": "Send the MoMo to 0241234567 by noon", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "0241234567", "labels": ["MOBILE_MONEY"]}], "note": "mobile money context"}
+{"text": "Pay via Telecel Cash on 020 765 4321.", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "020 765 4321", "labels": ["MOBILE_MONEY"]}], "note": "Telecel Cash context"}
+{"text": "Send the MoMo to 0551234567 or call +233 20 123 4567.", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "0551234567", "labels": ["MOBILE_MONEY"]}, {"entity": "GH_MOBILE_NUMBER", "value": "+233 20 123 4567", "labels": []}], "note": "context belongs to the nearest number"}
+{"text": "My house line is 0302 123 456.", "expect": [{"entity": "GH_LANDLINE_NUMBER", "value": "0302 123 456"}], "note": "Accra fixed line at home"}
+{"text": "Home phone in Kumasi: 0322-123-456", "expect": [{"entity": "GH_LANDLINE_NUMBER", "value": "0322-123-456"}], "note": "Kumasi fixed line, hyphenated"}
+{"text": "Order 0991234567 shipped", "expect": [], "note": "ten digits with an unallocated prefix"}
+{"text": "Invoice 0001234567 is due", "expect": [], "note": "invoice number with leading zeros"}
+{"text": "Reference 12345678901234 attached", "expect": [], "note": "long numeric reference"}
+{"text": "Account 10241234567890 credited", "expect": [], "note": "phone-like digits inside a longer number"}
+{"text": "Total GHS 1,024,123.45 paid", "expect": [], "note": "amount"}
+{"text": "Dated 2024-12-31 at 05:41", "expect": [], "note": "date and time"}
+{"text": "SKU AB0241234567 in stock", "expect": [], "note": "digits glued to letters"}
+{"text": "+1 024 123 4567 is a US number", "expect": [], "note": "another country's code"}
+{"text": "Fax 0241 2345", "expect": [], "note": "too few digits"}
+{"text": "Call 025 612 3456 now", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "025 612 3456"}], "note": "025 is only allocated as 0256 and 0257"}
+{"text": "Code 0251234567 sent", "expect": [], "note": "0251 is not allocated"}
+{"text": "For enquiries, call the hospital on 0302 123 456 between Monday and Friday.", "expect": [], "note": "an organisation's switchboard isn't personal"}
+{"text": "Mensah Enterprises Ltd head office: 0302 765 432. Customer care: 0322 123 456.", "expect": [], "note": "office and customer-care lines of a company"}
+{"text": "Call the studio line on 0302 222 333 to request a song.", "expect": [], "note": "a radio studio line"}
+{"text": "The office is on 0302 123 456.", "expect": [], "note": "an office line with nothing tying it to a person"}
+{"text": "Please call me at the office on 0302 123 456.", "expect": [{"entity": "GH_LANDLINE_NUMBER", "value": "0302 123 456"}], "note": "a work line tied to a person is still reported"}
+{"text": "The bank called my house phone, 0302 123 456, twice.", "expect": [{"entity": "GH_LANDLINE_NUMBER", "value": "0302 123 456"}], "note": "a personal word wins over an organisation's"}
+{"text": "Call our customer care on 024 123 4567.", "expect": [{"entity": "GH_MOBILE_NUMBER", "value": "024 123 4567"}], "note": "mobile numbers are never suppressed by business context"}

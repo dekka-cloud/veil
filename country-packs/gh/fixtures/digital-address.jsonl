@@ -1,0 +1,12 @@
+{"text": "My digital address is GA-543-0125", "expect": [{"entity": "GH_DIGITAL_ADDRESS", "value": "GA-543-0125"}], "note": "Greater Accra with context"}
+{"text": "Deliver to AK-039-5028 tomorrow", "expect": [{"entity": "GH_DIGITAL_ADDRESS", "value": "AK-039-5028"}], "note": "hyphenated without context"}
+{"text": "GPS address: ak0395028", "expect": [{"entity": "GH_DIGITAL_ADDRESS", "value": "ak0395028"}], "note": "unhyphenated with context"}
+{"text": "Ghana Post GPS GE 2331 0957", "expect": [{"entity": "GH_DIGITAL_ADDRESS", "value": "GE 2331 0957"}], "note": "four-digit area with spaces and context"}
+{"text": "Part number AK0395028 in stock", "expect": [], "note": "unhyphenated without address context"}
+{"text": "Model ZZ-123-4567 released", "expect": [], "note": "unknown region letter"}
+{"text": "Batch QA-543-0125 passed", "expect": [], "note": "unknown region letter"}
+{"text": "Order GA-54-0125 sent", "expect": [], "note": "too few digits in the middle"}
+{"text": "We moved to AKW-039-5028 last year", "expect": [{"entity": "GH_DIGITAL_ADDRESS", "value": "AKW-039-5028"}], "note": "three-character district code (Kwadaso)"}
+{"text": "Send it to A2-123-4567 please", "expect": [{"entity": "GH_DIGITAL_ADDRESS", "value": "A2-123-4567"}], "note": "district code with a digit (Adansi North)"}
+{"text": "Model GH-123-4567 is new", "expect": [], "note": "region letter valid but district code not published"}
+{"text": "Tamale office is NT-123-4567", "expect": [{"entity": "GH_DIGITAL_ADDRESS", "value": "NT-123-4567"}], "note": "Northern region"}

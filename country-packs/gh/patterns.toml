@@ -1,0 +1,122 @@
+# Pattern-and-context detectors for Ghanaian identifiers, read by gh::patterns.
+#
+# Each entry is one detector. `pattern` is a regex (linear-time `regex` crate syntax) for
+# the identifier itself; matches glued to other letters or digits are ignored. When
+# `requires_context` is true a match counts only with one of `context` nearby, within
+# `window` bytes and the same sentence. `prefixes`, when given, lists the allowed values of
+# the match's first `prefix_length` characters. `validation` says how strongly the format
+# is sourced: VALID_FORMAT for an authoritative published format, UNVERIFIED otherwise.
+# Formats and sources come from identifiers.yaml in this directory; nothing here is
+# invented, and identifiers with no usable published shape aren't listed.
+
+# GRA Taxpayer Identification Number for individuals without a Ghana Card PIN, such as
+# non-residents: P00 and eight digits. Source: GRA's TIN filing to the OECD (authoritative).
+[[detector]]
+id = "gh-tin-v1"
+description = "GRA taxpayer identification numbers for individuals (P00…)"
+entity = "GH_TAX_IDENTIFIER"
+pattern = 'P00\d{8}'
+categories = ["PERSONAL_IDENTIFIER", "FINANCIAL_INFORMATION"]
+sensitivity = "SENSITIVE"
+validation = "VALID_FORMAT"
+context = ["tin", "taxpayer", "tax id", "tax identification", "gra", "revenue authority"]
+requires_context = false
+confidence = 0.8
+confidence_with_context = 0.92
+source = "https://www.oecd.org/content/dam/oecd/en/topics/policy-issue-focus/aeoi/ghana-tin.pdf"
+
+# The same TIN format for organisations: C00 companies, G00 government agencies, Q00
+# foreign missions, V00 other institutions. These identify organisations, not people.
+[[detector]]
+id = "gh-tin-org-v1"
+description = "GRA taxpayer identification numbers for organisations (C00, G00, Q00, V00)"
+entity = "GH_TAX_IDENTIFIER"
+pattern = '[CGQV]00\d{8}'
+categories = ["ORGANISATIONAL_IDENTIFIER"]
+sensitivity = "INTERNAL"
+validation = "VALID_FORMAT"
+context = ["tin", "taxpayer", "tax id", "tax identification", "gra", "revenue authority"]
+requires_context = false
+confidence = 0.75
+confidence_with_context = 0.9
+source = "https://www.oecd.org/content/dam/oecd/en/topics/policy-issue-focus/aeoi/ghana-tin.pdf"
+
+# DVLA vehicle registration since 2009: a regional code, a number up to four digits and a
+# two-digit year, written like GR 1234-23. Region codes from secondary sources only, so
+# matches are UNVERIFIED. GR (Greater Accra) follows the source's "first letter plus R" rule
+# though its list omits it. Police, army, fire and prison codes (GP, GA, FS, PS) are left out
+# because those plates identify state vehicles, not people. A plate links to a person only
+# through registration records, so it's a quasi-identifier.
+[[detector]]
+id = "gh-vehicle-registration-v1"
+description = "Ghanaian vehicle registration numbers such as GR 1234-23"
+entity = "GH_VEHICLE_REGISTRATION"
+pattern = '[A-Z]{2} ?\d{1,4}-\d{2}'
+prefix_length = 2
+prefixes = ["AC", "AE", "AK", "AP", "AS", "AW", "BA", "BR", "BW", "BT", "CR", "EN", "ER", "ES", "GB", "GC", "GE", "GG", "GH", "GL", "GM", "GN", "GR", "GT", "GS", "GW", "GX", "GY", "NR", "UE", "UW", "VA", "VD", "VR", "WR", "WT"]
+categories = ["QUASI_IDENTIFIER"]
+sensitivity = "PERSONAL"
+validation = "UNVERIFIED"
+context = ["car", "vehicle", "plate", "number plate", "registration", "reg no", "reg. no", "taxi", "trotro", "motorbike", "okada", "dvla"]
+# Plates of buses, tankers, company fleets and vehicles in accident or police reports
+# identify an organisation or an event, not a person, so they aren't reported, unless the
+# same sentence ties the plate to someone ("my car", "registered to", "owned by").
+public_context = ["bus", "buses", "metro mass", "stc", "vip bus", "tanker", "truck", "articulated", "trailer", "fleet", "company vehicle", "official vehicle", "state vehicle", "ambulance", "fire tender", "police said", "police report", "police have", "mttd", "crash", "collided", "collision", "accident", "overturned", "somersault", "eyewitness", "reported that", "the vehicle with registration", "a vehicle with registration", "with registration number"]
+owner_context = ["my car", "my vehicle", "my bike", "my motorbike", "my taxi", "my trotro", "our car", "his car", "her car", "registered to", "registered in the name", "owned by", "owner", "belongs to", "belonging to"]
+requires_context = false
+confidence = 0.7
+confidence_with_context = 0.88
+source = "https://en.wikipedia.org/wiki/Vehicle_registration_plates_of_Ghana (secondary)"
+
+# Bank account numbers have no national format: 8 to 16 digits, most often 13, with no
+# checksum (GhIPSS, payments documentation). Only reported next to account words.
+[[detector]]
+id = "gh-bank-account-v1"
+description = "Bank account numbers, by context only"
+entity = "BANK_ACCOUNT_NUMBER"
+pattern = '\d{8,16}'
+categories = ["FINANCIAL_INFORMATION", "PERSONAL_IDENTIFIER"]
+sensitivity = "SENSITIVE"
+validation = "UNVERIFIED"
+context = ["account number", "account no", "acct", "a/c", "bank account", "sort code", "branch", "transfer to", "gcb", "ecobank", "stanbic", "fidelity", "calbank", "absa", "zenith", "access bank", "republic bank", "uba", "standard chartered", "adb"]
+requires_context = true
+window = 40
+confidence = 0.6
+confidence_with_context = 0.6
+source = "https://ghipss.net/bank-sort-codes/; payments documentation (secondary)"
+
+# Passport numbers: no official format is published. Community sources describe a letter
+# and seven digits, consistent with the passport's machine-readable zone, so a match needs
+# a passport word nearby and is UNVERIFIED.
+[[detector]]
+id = "gh-passport-v1"
+description = "Ghanaian passport numbers, by context only"
+entity = "GH_PASSPORT_NUMBER"
+pattern = '[A-Z]\d{7}'
+categories = ["PERSONAL_IDENTIFIER"]
+sensitivity = "HIGHLY_SENSITIVE"
+validation = "UNVERIFIED"
+context = ["passport", "passport number", "passport no", "travel document"]
+requires_context = true
+window = 40
+confidence = 0.6
+confidence_with_context = 0.6
+source = "Community descriptions only; the Passport Office publishes no format"
+
+# Voter ID numbers: no published format; commonly reported as ten digits on the card. A
+# match needs a voter word nearby and is UNVERIFIED. A ten-digit Ghanaian phone number
+# still wins, because its format is validated.
+[[detector]]
+id = "gh-voter-id-v1"
+description = "Electoral Commission voter ID numbers, by context only"
+entity = "GH_VOTER_ID"
+pattern = '\d{10}'
+categories = ["PERSONAL_IDENTIFIER"]
+sensitivity = "SENSITIVE"
+validation = "UNVERIFIED"
+context = ["voter id", "voter's id", "voters id", "voter identification", "voter card", "voter's card", "polling station"]
+requires_context = true
+window = 40
+confidence = 0.55
+confidence_with_context = 0.55
+source = "https://ec.gov.gh/registration (no format published); commonly reported shape"

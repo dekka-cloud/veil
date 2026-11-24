@@ -1,0 +1,32 @@
+[package]
+name = "veil"
+description = "Dekka Veil: find and protect personal information locally, with Ghana-aware detectors"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+veil-core.workspace = true
+veil-detectors.workspace = true
+veil-policy.workspace = true
+veil-country-packs.workspace = true
+veil-inference = { workspace = true, optional = true }
+serde.workspace = true
+thiserror.workspace = true
+toml.workspace = true
+
+[features]
+default = ["model"]
+# Veil's contextual model through ONNX Runtime, for the nano and hybrid profiles. Without it
+# the build is rules-only and those profiles are refused.
+model = ["dep:veil-inference", "veil-inference/onnxruntime"]
+
+[dev-dependencies]
+veil-inference = { workspace = true, features = ["onnxruntime"] }
+proptest.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

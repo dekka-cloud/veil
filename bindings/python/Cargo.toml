@@ -1,0 +1,19 @@
+[package]
+name = "dekka-veil-python"
+description = "Python bindings for Dekka Veil"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+name = "_veil"
+crate-type = ["cdylib"]
+
+[dependencies]
+veil = { workspace = true, features = ["model"] }
+serde.workspace = true
+serde_json.workspace = true
+pyo3 = { version = "0.30", features = ["extension-module", "abi3-py310"] }

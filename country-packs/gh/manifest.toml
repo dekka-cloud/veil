@@ -1,0 +1,35 @@
+# The Ghana country pack. Versioned on its own, apart from the engine.
+id = "gh"
+name = "Ghana"
+version = "0.1.0"
+taxonomy_version = "0.1.0"
+
+entities = [
+    "GH_MOBILE_NUMBER",
+    "GH_LANDLINE_NUMBER",
+    "GH_GHANA_CARD_PIN",
+    "GH_DIGITAL_ADDRESS",
+]
+
+# BCP 47 tags: English, Twi (Akan), Ewe and Ga. Coverage is reported per language once
+# evaluation data exists; listing a language here claims nothing about quality.
+languages = ["en", "tw", "ee", "gaa"]
+
+# How well each format the pack detects is documented, copied from the identifier registry
+# (identifiers.yaml in this directory, `evidence_level`). Every finding the pack
+# reports carries its entity's level beside its validation state. A test fails if a detector
+# reports an entity missing here, or if a level here disagrees with the registry.
+#   ISSUER_CONFIRMED        the issuing body publishes the format
+#   INTERNATIONAL_STANDARD  an international standard defines it
+#   SECONDARY               only maintained secondary references describe it
+#   UNPUBLISHED             no format is published, so detection rests on context
+[evidence]
+GH_MOBILE_NUMBER = "ISSUER_CONFIRMED"
+GH_LANDLINE_NUMBER = "ISSUER_CONFIRMED"
+GH_GHANA_CARD_PIN = "ISSUER_CONFIRMED"
+GH_DIGITAL_ADDRESS = "ISSUER_CONFIRMED"
+GH_TAX_IDENTIFIER = "ISSUER_CONFIRMED"
+GH_VOTER_ID = "ISSUER_CONFIRMED"
+GH_VEHICLE_REGISTRATION = "SECONDARY"
+GH_PASSPORT_NUMBER = "UNPUBLISHED"
+BANK_ACCOUNT_NUMBER = "UNPUBLISHED"

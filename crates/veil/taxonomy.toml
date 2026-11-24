@@ -1,0 +1,166 @@
+# The entities Veil reports, for listings such as the server's GET /v1/entities. Every
+# entity a detector can emit must appear here; a test checks it. Categories and
+# sensitivity are Veil's defaults: a detector may add categories from context, such as
+# FINANCIAL_INFORMATION on a phone number used for mobile money.
+
+[[entity]]
+code = "EMAIL_ADDRESS"
+family = "PII"
+categories = ["PERSONAL_IDENTIFIER"]
+sensitivity = "PERSONAL"
+description = "An email address"
+
+[[entity]]
+code = "IP_ADDRESS"
+family = "PII"
+categories = ["QUASI_IDENTIFIER"]
+sensitivity = "PERSONAL"
+description = "An IPv4 or IPv6 address"
+
+[[entity]]
+code = "PAYMENT_CARD_PAN"
+family = "PII"
+categories = ["FINANCIAL_INFORMATION", "PERSONAL_IDENTIFIER"]
+sensitivity = "HIGHLY_SENSITIVE"
+description = "A payment card number that passes the Luhn check"
+
+[[entity]]
+code = "GH_MOBILE_NUMBER"
+family = "PII"
+categories = ["PERSONAL_IDENTIFIER"]
+sensitivity = "PERSONAL"
+jurisdiction = "GH"
+description = "A Ghanaian mobile number, labelled MOBILE_MONEY when used as a wallet"
+
+[[entity]]
+code = "GH_LANDLINE_NUMBER"
+family = "PII"
+categories = ["PERSONAL_IDENTIFIER"]
+sensitivity = "PERSONAL"
+jurisdiction = "GH"
+description = "A Ghanaian fixed-line number"
+
+[[entity]]
+code = "GH_GHANA_CARD_PIN"
+family = "PII"
+categories = ["PERSONAL_IDENTIFIER"]
+sensitivity = "HIGHLY_SENSITIVE"
+jurisdiction = "GH"
+description = "A Ghana Card PIN, which is also the holder's TIN and SSNIT number"
+
+[[entity]]
+code = "GH_DIGITAL_ADDRESS"
+family = "PII"
+categories = ["LOCATION_IDENTIFIER", "QUASI_IDENTIFIER"]
+sensitivity = "PERSONAL"
+jurisdiction = "GH"
+description = "A GhanaPost GPS digital address"
+
+[[entity]]
+code = "GH_TAX_IDENTIFIER"
+family = "PII"
+categories = ["PERSONAL_IDENTIFIER", "FINANCIAL_INFORMATION"]
+sensitivity = "SENSITIVE"
+jurisdiction = "GH"
+description = "A GRA taxpayer identification number; organisational TINs are ORGANISATIONAL_IDENTIFIER"
+
+[[entity]]
+code = "GH_VEHICLE_REGISTRATION"
+family = "PII"
+categories = ["QUASI_IDENTIFIER"]
+sensitivity = "PERSONAL"
+jurisdiction = "GH"
+description = "A Ghanaian vehicle registration plate"
+
+[[entity]]
+code = "BANK_ACCOUNT_NUMBER"
+family = "PII"
+categories = ["FINANCIAL_INFORMATION", "PERSONAL_IDENTIFIER"]
+sensitivity = "SENSITIVE"
+description = "A bank account number, found next to account words"
+
+[[entity]]
+code = "GH_PASSPORT_NUMBER"
+family = "PII"
+categories = ["PERSONAL_IDENTIFIER"]
+sensitivity = "HIGHLY_SENSITIVE"
+jurisdiction = "GH"
+description = "A Ghanaian passport number, found next to passport words"
+
+[[entity]]
+code = "GH_VOTER_ID"
+family = "PII"
+categories = ["PERSONAL_IDENTIFIER"]
+sensitivity = "SENSITIVE"
+jurisdiction = "GH"
+description = "An Electoral Commission voter ID number, found next to voter ID words"
+
+[[entity]]
+code = "URL_PERSONAL_DATA"
+family = "PII"
+categories = ["PERSONAL_IDENTIFIER"]
+sensitivity = "PERSONAL"
+description = "A URL query parameter carrying personal details"
+
+[[entity]]
+code = "URL_CREDENTIAL"
+family = "SECRET"
+categories = ["CREDENTIAL"]
+sensitivity = "HIGHLY_SENSITIVE"
+description = "A URL query parameter carrying a credential"
+
+[[entity]]
+code = "PRIVATE_KEY"
+family = "SECRET"
+categories = ["CREDENTIAL"]
+sensitivity = "HIGHLY_SENSITIVE"
+description = "A PEM private key block"
+
+[[entity]]
+code = "JWT"
+family = "SECRET"
+categories = ["CREDENTIAL"]
+sensitivity = "HIGHLY_SENSITIVE"
+description = "A JSON Web Token"
+
+[[entity]]
+code = "AWS_ACCESS_KEY_ID"
+family = "SECRET"
+categories = ["CREDENTIAL"]
+sensitivity = "HIGHLY_SENSITIVE"
+description = "An AWS access key ID"
+
+[[entity]]
+code = "GITHUB_TOKEN"
+family = "SECRET"
+categories = ["CREDENTIAL"]
+sensitivity = "HIGHLY_SENSITIVE"
+description = "A GitHub token"
+
+[[entity]]
+code = "STRIPE_SECRET_KEY"
+family = "SECRET"
+categories = ["CREDENTIAL"]
+sensitivity = "HIGHLY_SENSITIVE"
+description = "A Stripe secret or restricted key"
+
+[[entity]]
+code = "SLACK_TOKEN"
+family = "SECRET"
+categories = ["CREDENTIAL"]
+sensitivity = "HIGHLY_SENSITIVE"
+description = "A Slack token"
+
+[[entity]]
+code = "SLACK_WEBHOOK_URL"
+family = "SECRET"
+categories = ["CREDENTIAL"]
+sensitivity = "HIGHLY_SENSITIVE"
+description = "A Slack incoming webhook URL"
+
+[[entity]]
+code = "SECRET"
+family = "SECRET"
+categories = ["CREDENTIAL"]
+sensitivity = "HIGHLY_SENSITIVE"
+description = "A password, API key or other secret assigned in text"

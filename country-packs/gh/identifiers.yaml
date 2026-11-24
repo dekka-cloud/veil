@@ -1,0 +1,584 @@
+# Ghana identifier research for Veil's Ghana country pack.
+#
+# Every format here cites its evidence and how strong that evidence is:
+#   authoritative       - the issuing body, a statute, or an international body it reports to (ITU, UPU, OECD)
+#   reputable_secondary - maintained references (libphonenumber, Wikipedia with cited sources, payment platforms)
+#   anecdotal           - blogs, forums, community code; useful leads, never a basis for VALID
+#
+# evidence_level summarises that evidence for the format Veil detects, and the Ghana pack copies
+# it into country-packs/gh/manifest.toml so every finding carries it (a test keeps the two in step):
+#   issuer_confirmed       - the issuing body publishes the format, directly or in a filing it made
+#   international_standard - an international standard defines the format (ICAO, ITU, ISO)
+#   secondary              - only reputable secondary references describe it
+#   unpublished            - no format is published; detection rests on context alone
+# It describes the specification, not a finding: validation_state says how strongly a match can
+# be checked against it, and neither says an identifier exists or belongs to anyone.
+#
+# Examples are synthetic. They follow the documented shape and do not belong to anyone.
+# Where no format is published, the entry says so and recommends context-only detection.
+#
+# Researched: 2026-11-04.
+# Re-check before each Ghana pack release.
+
+schema_version: 1
+researched_on: "2026-11-04"
+
+entities:
+
+  - code: GH_GHANA_CARD_PIN
+    name: Ghana Card Personal Identification Number
+    issuer: National Identification Authority (NIA)
+    format:
+      description: >-
+        Three parts separated by hyphens. A three-letter ISO 3166 alpha-3 code for the holder's
+        nationality at first registration (GHA for citizens, another code for foreign residents on the
+        non-citizen card), an 8- or 9-digit system-generated number, and one check character that can be a
+        digit or a letter. The PIN never changes, even if nationality later changes.
+      pattern_hint: '\b[A-Z]{3}-\d{8,9}-[0-9A-Z]\b'
+      separators_seen: ["-", " ", "none (GHA1234567890)"]
+      length: "14 or 15 characters with hyphens"
+      examples_synthetic: ["GHA-123456789-0", "GHA-12345678-K"]
+    check_digit:
+      published: false
+      note: >-
+        GRA's filing to the OECD says the check character "is used internally to validate a PIN during the
+        PIN creation process". The algorithm is not published, so Veil cannot claim VALID.
+    validation_state: VALID_FORMAT
+    evidence_level: issuer_confirmed
+    since: "Doubles as the individual TIN since 1 April 2021 and as the SSNIT number since June 2021."
+    context_words_en: ["Ghana Card", "Ghana card number", "Ghanacard PIN", "NIA number", "national ID", "ID number", "PIN", "TIN", "SSNIT number", "card no."]
+    context_words_local: []  # not yet sourced; collect during annotation
+    false_positive_risks:
+      - Other three-letter-prefixed references with the same digit shape (order numbers, internal codes).
+      - Foreign-national PINs start with other ISO codes, so a GHA-only pattern misses them, while allowing every ISO code raises false positives; require context for non-GHA prefixes.
+    detection: pattern + ISO alpha-3 allowlist + context boost; non-GHA prefixes need context
+    evidence:
+      - url: https://register.nia.gov.gh/faqs
+        publisher: National Identification Authority (registration FAQ)
+        strength: authoritative
+        says: "The PIN for Ghanaians starts with the code GHA followed by ten digits (GHA-000000000-0), whilst that for Nigerians for example will read (NRG-000000000-0) per ICAO country codes. Both citizens and non-citizens have the same card."
+        note: "The NIA's own example gives Nigeria as NRG, not the ISO and ICAO code NGA. Treat any three-letter prefix as possible on non-citizen cards rather than relying on an ISO list. A blog's claim of a GHA-N- prefix for residents (jbklutse.com) contradicts the NIA and is not adopted."
+      - url: https://www.oecd.org/content/dam/oecd/en/topics/policy-issue-focus/aeoi/ghana-tin.pdf
+        publisher: Ghana Revenue Authority via OECD (AEOI TIN information)
+        strength: authoritative
+        says: "15-character Ghanacard PIN; country code, 8 or 9 digit number, checksum character (number or character); hyphen-separated; became TIN for individuals on 1 April 2021."
+      - url: https://www.myjoyonline.com/your-id-number-on-the-ghana-card-is-now-your-ssnit-number
+        publisher: MyJoyOnline (reporting SSNIT, citing LI 2111 and an NPRA directive)
+        date: "2021-06-28"
+        strength: reputable_secondary
+        says: "The Ghana Card ID number is now the SSNIT number."
+      - url: https://github.com/vincentaddai882-eng/ghana-card-validator
+        publisher: community library
+        strength: anecdotal
+        says: "GHA-XXXXXXXXX-X; NIA does not publish the check-digit algorithm."
+
+  - code: GH_MOBILE_NUMBER
+    name: Ghanaian mobile number
+    issuer: National Communications Authority (NCA), numbering plan; operators MTN, Telecel (formerly Vodafone Ghana), AT (formerly AirtelTigo)
+    format:
+      description: >-
+        Nine-digit national significant number. Written with a trunk 0 domestically (0XX XXX XXXX) or with
+        +233 / 00233 / 233 internationally, dropping the 0. Mobile number portability applies, so a prefix
+        no longer proves the current operator.
+      national_number_pattern_libphonenumber: '(?:2(?:[0346-9]\d|5[67])|5(?:[03-7]\d|9[1-9]))\d{6}'
+      common_prefixes:
+        mtn: ["024", "025 (0256, 0257 only)", "053", "054", "055", "059"]
+        telecel: ["020", "050"]
+        at: ["026", "027", "056", "057"]
+        other_assigned_or_historic: ["023 (Globacom)", "028 (Expresso)"]
+      separators_seen: [" ", "-", ".", "none", "brackets around 0 e.g. (0)24"]
+      examples_synthetic: ["024 123 4567", "+233 24 123 4567", "0501234567"]
+    validation_state: VALID_FORMAT
+    evidence_level: issuer_confirmed
+    recommended_source_of_truth: >-
+      Google libphonenumber metadata for GH (Apache-2.0), vendored and versioned in the pack, rather than a
+      hand-kept prefix list. Release v9.0.42 (2026-10-27) was current when researched.
+    context_words_en: ["call", "phone", "tel", "mobile", "number", "WhatsApp", "line", "contact", "reach me on", "momo"]
+    # How speakers ask for and give numbers on airtime and banking calls, from the Financial
+    # Inclusion Speech Dataset (Ashesi University and Nokwary Technologies, funded by Lacuna
+    # Fund, CC-BY-4.0). Glosses are the Veil team's and unreviewed.
+    context_words_local:
+      - "me number yɛ / me number no yɛ (tw, fat: my number is)"
+      - "number bɛn / ɛbɛn number (tw, fat: which number)"
+      - "network bɛn / ebɛn network (tw, fat: which network)"
+      - "agu, akɔ … so, egu … do (tw, fat: onto, of airtime)"
+      - "mɛɛ number nɔ (gaa: on which number)"
+      - "tsɛ number (gaa: tell or call a number)"
+      - "momo nɔma (tw: momo number)"
+    spoken_forms: >-
+      Speech transcripts and voice notes write numbers as said: "zero two four, one two three,
+      four five six seven", "oh five five double four…", or Akan and Ewe digit words. A network
+      prefix said alone ("my number is 024") identifies no one and isn't a number.
+    false_positive_risks:
+      - Ten-digit order, invoice and reference numbers that happen to start with 02 or 05.
+      - Amounts written with spaces (e.g. GHS 024 000 0000 style formatting is rare but possible in tables).
+    detection: >-
+      libphonenumber-derived pattern + normalisation of separators and +233; context raises
+      confidence. gh-phone-spoken-v1 reads digit words (country-packs/gh/spoken-digits.toml, from
+      CLDR and Common Voice's CC0 Twi sentences) and reports a run only when it spells a whole
+      number the plan accepts.
+    evidence:
+      - url: https://www.nca.org.gh/wp-content/uploads/2021/11/NUMBERING-PLAN-FOR-GHANA.pdf
+        publisher: National Communications Authority (numbering plan, ITU-T E.164 presentation)
+        strength: authoritative
+        says: "For country code +233, the minimum and maximum number length excluding the country code is 9 digits."
+      - url: https://nms-test.nca.org.gh/numbering-plan
+        publisher: National Communications Authority (numbering management system)
+        strength: authoritative
+        says: "Table of national destination codes and area codes, e.g. national prefix 0, NDC 030, network destination code 0302 for Greater Accra."
+      - url: https://raw.githubusercontent.com/google/libphonenumber/master/resources/PhoneNumberMetadata.xml
+        publisher: Google libphonenumber
+        strength: reputable_secondary
+        says: "GH mobile pattern above; fixed line 9 digits; mobileNumberPortableRegion=true; cites ITU and NCA."
+      - url: https://www.itu.int/dms_pub/itu-t/oth/02/02/T02020000520009PDFE.pdf
+        publisher: ITU (Ghana numbering communication, 20 Dec 2022)
+        strength: authoritative
+        says: "MTN 55Y blocks for mobile; 25 40 non-geographic block to Comsys."
+      - url: https://en.wikipedia.org/wiki/Telephone_numbers_in_Ghana
+        publisher: Wikipedia
+        strength: reputable_secondary
+        says: "All numbers nine digits since 1 May 2010; operator network codes listed."
+    open_question: "NCA's current numbering plan document was not found online; ask NCA or rely on libphonenumber."
+
+  - code: GH_LANDLINE_NUMBER
+    name: Ghanaian fixed-line number
+    issuer: NCA
+    format:
+      description: >-
+        Nine-digit national number starting with 3 (area codes 030 Greater Accra, 031 Western, 032 Ashanti,
+        033 Central, 034 Eastern, 035 Bono/Brong Ahafo, 036 Volta, 037 Northern, 038 Upper East, 039 Upper West),
+        written 03X XXX XXXX or +233 3X XXX XXXX.
+      national_number_pattern: "see libphonenumber GH fixedLine"
+      examples_synthetic: ["030 234 5678", "+233 32 202 0000"]
+    validation_state: VALID_FORMAT
+    evidence_level: issuer_confirmed
+    context_words_en: ["tel", "office", "landline", "fax", "phone"]
+    false_positive_risks: ["Organisation switchboard numbers are public business data, not personal data, in most contexts."]
+    detection: >-
+      libphonenumber-derived pattern. A fixed line whose sentence names an organisation or a public
+      line (head office, customer care, hotline, a bank or hospital) and ties it to no person isn't
+      reported; the word lists are public_context and owner_context in country-packs/gh/numbering.toml.
+    evidence:
+      - url: https://www.nca.org.gh/wp-content/uploads/2021/11/NUMBERING-PLAN-FOR-GHANA.pdf
+        publisher: National Communications Authority (numbering plan, ITU-T E.164 presentation)
+        strength: authoritative
+        says: "For country code +233, the minimum and maximum number length excluding the country code is 9 digits."
+      - url: https://nms-test.nca.org.gh/numbering-plan
+        publisher: National Communications Authority (numbering management system)
+        strength: authoritative
+        says: "Table of national destination codes and area codes, e.g. national prefix 0, NDC 030, network destination code 0302 for Greater Accra."
+      - url: https://en.wikipedia.org/wiki/Telephone_numbers_in_Ghana
+        publisher: Wikipedia
+        strength: reputable_secondary
+        says: "Fixed-line area codes by region after the 2010 migration."
+
+  - code: GH_DIGITAL_ADDRESS
+    name: GhanaPost GPS digital address
+    issuer: Ghana Post Company / GhanaPostGPS
+    format:
+      description: >-
+        A postcode plus a unique address. The postcode is a region letter, a district code of one or two
+        more characters (letters or digits), a hyphen and a 3- or 4-digit area code. The digital address
+        adds a hyphen and a 4-digit unique address for a 5 m by 5 m grid square.
+      pattern_hint: '\b[ABCEGHMNOSTUVWXY][A-Z0-9]{1,2}-\d{3,4}-\d{4}\b'
+      region_letters:
+        A: Ashanti
+        B: Bono
+        C: Central
+        E: Eastern
+        G: Greater Accra
+        H: Ahafo
+        M: North East
+        N: Northern
+        O: Oti
+        S: Savannah
+        T: Bono East
+        U: Upper East
+        V: Volta
+        W: Western
+        X: Upper West
+        Y: Western North
+      district_codes: "country-packs/gh/digital-address.toml (261 codes, 16 regions)"
+      separators_seen: ["-", " ", "none"]
+      examples_synthetic: ["GA-183-8164 (Ghana Post's own published example for its head office)", "AK-039-5028 (GhanaPostGPS's published example)"]
+    validation_state: VALID_FORMAT
+    evidence_level: issuer_confirmed
+    note: >-
+      Validate the region letter and the district code against the published list. Don't treat a valid
+      address as residential: it may be a business, a post office or a public place.
+    context_words_en: ["digital address", "GPS address", "GhanaPost GPS", "GhanaPostGPS", "address", "location", "house"]
+    false_positive_risks:
+      - Product and part codes shaped like XX-123-4567.
+      - Postcodes alone (GA-183) are area codes, not individual locations; treat as quasi-identifiers.
+    detection: pattern + region/district allowlist + context
+    evidence:
+      - url: https://www.ghanapostgps.com/
+        publisher: GhanaPostGPS
+        strength: authoritative
+        says: "AK-039-5028: A region, K district, 039 area, 5028 unique address."
+      - url: https://www.ghanapostgps.com/regions-and-district-codes/
+        publisher: GhanaPostGPS
+        strength: authoritative
+        says: "Region and district code guide (2- and 3-character codes)."
+      - url: https://www.ghanapostgps.com/get-help
+        publisher: GhanaPostGPS
+        strength: authoritative
+        says: "First letter is the region, second letter/digit the district; then area code; then unique address."
+      - url: https://www.upu.int/UPU/media/upu/PostalEntitiesFiles/addressingUnit/ghaEn.pdf
+        publisher: Universal Postal Union (Ghana addressing sheet, March 2023)
+        strength: authoritative
+        says: "Postcode is two characters, a dash and 3 or 4 digits; the digital address adds a 4-digit unique address."
+
+  - code: GH_MOMO_ACCOUNT
+    name: Mobile money account identifier
+    issuer: Mobile money operators (MTN MoMo, Telecel Cash, AT Money) under Bank of Ghana regulation
+    format:
+      description: >-
+        A mobile money wallet is identified by the subscriber's mobile number, so the format is
+        GH_MOBILE_NUMBER. Veil should keep the phone classification and add a MOBILE_MONEY context label
+        when payment context is present.
+    validation_state: VALID_FORMAT
+    evidence_level: secondary  # a MoMo wallet is a mobile number; no issuer documents the account as such
+    context_words_en: ["*170#", "*110#", "momo", "mobile money", "MoMo number", "send to", "cash out", "wallet", "Telecel Cash", "AT Money", "merchant", "transaction ID"]
+    false_positive_risks: ["Merchant short codes and transaction IDs are not account numbers."]
+    detection: GH_MOBILE_NUMBER + payment-context classifier
+    evidence: []
+    open_question: "Merchant IDs and transaction ID formats per operator are not publicly documented; collect samples from operator docs under licence."
+
+  - code: GH_TAX_IDENTIFIER
+    name: Taxpayer Identification Number (TIN)
+    issuer: Ghana Revenue Authority (GRA)
+    format:
+      description: >-
+        For individuals eligible for the Ghana Card, the TIN is the Ghana Card PIN (since 1 April 2021).
+        GRA still issues an 11-character TIN to non-resident individuals, foreign mission staff and
+        organisations, with a prefix of P00 (individuals), C00 (companies registered with the RGD),
+        G00 (government agencies), Q00 (foreign missions and their employees) or V00 (public institutions,
+        trusts, co-operatives and others not registered with the RGD).
+      pattern_hint: '\b[PCGQV]00\d{8}\b'   # 11 characters; character class of the last 8 not stated (assumed digits from samples)
+      examples_synthetic: ["P0012345678", "C0012345678"]
+    validation_state: VALID_FORMAT
+    evidence_level: issuer_confirmed
+    note: "C00, G00, Q00 and V00 TINs identify organisations, so classify them as ORGANISATIONAL_IDENTIFIER, not personal."
+    context_words_en: ["TIN", "taxpayer identification number", "GRA", "tax ID"]
+    evidence:
+      - url: https://www.oecd.org/content/dam/oecd/en/topics/policy-issue-focus/aeoi/ghana-tin.pdf
+        publisher: Ghana Revenue Authority via OECD
+        strength: authoritative
+        says: "11-digit alphanumeric GRA TIN with the listed prefixes; Ghana Card PIN is the TIN for eligible individuals."
+    open_question: "Whether the 8 characters after the prefix are always digits is not stated; confirm with GRA samples."
+
+  - code: GH_SSNIT_NUMBER
+    name: SSNIT social security number
+    issuer: Social Security and National Insurance Trust (SSNIT)
+    format:
+      description: >-
+        Since June 2021 the Ghana Card PIN is the SSNIT number. Legacy SSNIT numbers are 13 characters: a
+        letter followed by 12 digits, where SSNIT's own explanation says the letter is the member's region
+        of birth and the number has six components. The full component breakdown wasn't retrievable from
+        the source, so only the outer shape is evidenced.
+      pattern_hint: '\b[A-Z]\d{12}\b'
+      length: "13 characters (legacy)"
+      examples_synthetic: ["GHA-123456789-0 (current)", "D012345678901 (legacy shape)"]
+    validation_state: VALID_FORMAT
+    evidence_level: issuer_confirmed
+    detection: current numbers as GH_GHANA_CARD_PIN with an SSNIT label; legacy letter+12 digits with SSNIT context
+    context_words_en: ["SSNIT", "social security", "SSNIT number", "pension", "Tier 1", "contributor"]
+    context_words_local: []
+    evidence:
+      - url: https://www.facebook.com/ssnitghana/posts/hello-folksdo-you-have-the-current-ghana-card-and-have-you
+        publisher: SSNIT (official Facebook page)
+        strength: authoritative
+        says: "SSNIT number is made up of 13 digits. It has 6 components ... the letter tells the region you were born."
+      - url: https://www.myjoyonline.com/your-id-number-on-the-ghana-card-is-now-your-ssnit-number
+        publisher: MyJoyOnline (reporting SSNIT)
+        date: "2021-06-28"
+        strength: reputable_secondary
+        says: "The Ghana Card ID number is now the SSNIT number (LI 2111, NPRA directive)."
+    open_question: "The six legacy components after the region letter; ask SSNIT for the written specification."
+    checked: "2026-11-04"
+
+  - code: GH_PASSPORT_NUMBER
+    name: Ghanaian passport number
+    issuer: Ghana Passport Office (Ministry of Foreign Affairs)
+    format:
+      description: >-
+        No official description of the printed passport number was found; community sources describe one
+        letter followed by seven digits (for example G1234567). The machine-readable zone on the data page,
+        however, is fully specified by ICAO Doc 9303: a passport (TD3) MRZ is two lines of 44 characters,
+        the first beginning P< followed by the issuing state code (GHA for Ghana), and the second carrying the
+        document number (9 characters, padded with <) with its own check digit, plus nationality, date of
+        birth and expiry with check digits. MRZ lines can therefore be detected and validated with ICAO's
+        published 7-3-1 check-digit algorithm.
+      pattern_hint: 'MRZ line 1: ^P<GHA[A-Z<]{39}$; line 2: ^[A-Z0-9<]{9}\d[A-Z]{3}\d{6}\d[MF<]\d{6}\d[A-Z0-9<]{14}\d\d$'
+      examples_synthetic: ["G1234567 (printed number, unverified shape)", "P<GHAMENSAH<<AMA<<<<<<<<<<<<<<<<<<<<<<<<<<<< (MRZ line 1, synthetic)"]
+    check_digit:
+      published: true
+      note: "ICAO 9303 Part 3 defines check digits for the MRZ document number, date of birth, expiry and composite; the printed number's own structure is unpublished."
+    validation_state: VALID
+    evidence_level: unpublished  # the printed number has no published format; the MRZ is international_standard (ICAO Doc 9303), and Veil detects printed numbers only
+    validation_note: "VALID applies only to MRZ lines whose ICAO check digits pass. A printed passport number outside an MRZ stays UNVERIFIED and needs passport context."
+    detection: MRZ lines by ICAO 9303 structure and check digits; printed numbers only with passport context
+    context_words_en: ["passport", "passport number", "passport no", "travel document", "MRZ"]
+    evidence:
+      - url: https://www.icao.int/publications/pages/publication.aspx?docnum=9303
+        publisher: International Civil Aviation Organization (Doc 9303, Machine Readable Travel Documents)
+        strength: authoritative
+        says: "Defines the TD3 MRZ layout, field positions, character set and 7-3-1 check-digit computation used by all ICAO member states, including Ghana."
+      - url: https://en.wikipedia.org/wiki/Ghanaian_passport
+        publisher: Wikipedia
+        strength: reputable_secondary
+        says: "Describes the biometric passport and its data page; does not state the printed number format."
+    open_question: "Ask the Passport Office for the printed number format."
+    checked: "2026-11-04"
+
+  - code: GH_VOTER_ID
+    name: Electoral Commission voter identification number
+    issuer: Electoral Commission of Ghana (EC)
+    format:
+      description: >-
+        A 10-digit number printed on the voter ID card. The EC tells voters to enter their "10-digit
+        Voter ID card number" to check the register. No check digit or internal structure is published,
+        and ten digits collide with phone numbers and many references, so a bare 10-digit run is never
+        enough on its own.
+      length: "10 digits"
+      examples_synthetic: ["1234567890"]
+    validation_state: VALID_FORMAT
+    evidence_level: issuer_confirmed
+    detection: 10-digit run with voter context words nearby; never pattern-only
+    context_words_en: ["voter ID", "voter's ID", "voter ID card number", "voter identification number", "EC", "polling station", "voters register"]
+    context_words_local: []
+    false_positive_risks:
+      - Ghanaian phone numbers written without separators are also 10 digits.
+      - Invoice, order and account references.
+    evidence:
+      - url: https://ec.gov.gh/presentation-by-mrs-jean-mensa-chairperson-of-the-electoral-commission-let-the-citizens-check-their-details/
+        publisher: Electoral Commission of Ghana
+        strength: authoritative
+        says: "Registered voters are required to enter their 10-digit Voter ID card number on the website application to confirm their details."
+      - url: https://ec.gov.gh/registration
+        publisher: Electoral Commission of Ghana
+        strength: authoritative
+        says: "Registration process; no further number structure."
+    checked: "2026-11-04"
+
+  - code: GH_DRIVERS_LICENSE
+    name: DVLA driver's licence number
+    issuer: Driver and Vehicle Licensing Authority (DVLA)
+    format:
+      description: "No published format was found on dvla.gov.gh."
+    validation_state: UNVERIFIED
+    evidence_level: unpublished
+    detection: context only
+    context_words_en: ["driver's licence", "driving licence", "licence number", "DVLA"]
+    evidence:
+      - url: https://www.dvla.gov.gh/services
+        publisher: DVLA
+        strength: authoritative
+        says: "Services and requirements; no number format."
+
+  - code: GH_VEHICLE_REGISTRATION
+    name: Vehicle registration number
+    issuer: DVLA
+    format:
+      description: >-
+        Since January 2009, a two-letter regional code, a number up to four digits, and a two-digit year code,
+        written like GR 1234-23 (GR Greater Accra, AS Ashanti, CR Central, ER Eastern, and so on). DVLA is
+        replacing the year with a two-letter registration-zone code, for example AS 3520-KM (Ashanti, Kumasi
+        zone), on RFID-enabled plates piloted from September 2026; the legislative instrument (LI 2180) setting
+        the format was still before Parliament when the roll-out was first suspended.
+      pattern_hint: '\b[A-Z]{2}[ -]?\d{1,4}[ -](?:\d{2}|[A-Z]{2})\b'
+      examples_synthetic: ["GR 1234-23", "AS 567-19", "AS 3520-KM (new format)"]
+    validation_state: VALID_FORMAT
+    evidence_level: secondary
+    note: "A plate identifies a vehicle, and links to a person only through registration records. Treat as a quasi-identifier."
+    context_words_en: ["car", "vehicle", "plate", "registration", "number plate", "reg no", "DVLA"]
+    false_positive_risks: ["Many two-letter-plus-digit codes in ordinary text, especially the new letter-suffix form."]
+    evidence:
+      - url: https://www.graphic.com.gh/news/general-news/dvla-to-abolish-displaying-year-of-registration-on-vehicle-number-plates.html
+        publisher: Daily Graphic (reporting the DVLA Chief Executive)
+        strength: reputable_secondary
+        says: "A vehicle registered in the Adenta zone will have AD after the four-digit number instead of the year; an Ashanti plate will read AS 3520-KM."
+      - url: https://www.citinewsroom.com/2026/09/dvla-begins-pilot-of-rfid-enabled-number-plates
+        publisher: Citi Newsroom
+        date: "2026-09-29"
+        strength: reputable_secondary
+        says: "DVLA begins a pilot of RFID-enabled number plates."
+      - url: https://en.wikipedia.org/wiki/Vehicle_registration_plates_of_Ghana
+        publisher: Wikipedia
+        strength: reputable_secondary
+        says: "Two-letter region code, four-digit number, two-digit year, since January 2009."
+    open_question: "The full list of zone codes, and the final layout once LI 2180 is passed."
+    checked: "2026-11-04"
+
+  - code: GH_NHIS_ID
+    name: National Health Insurance Scheme membership number
+    issuer: National Health Insurance Authority (NHIA)
+    format:
+      description: >-
+        An 8-digit membership number. The NHIA's own *929# renewal instructions ask members to "Enter
+        the 8 Digit Membership Number". Newer enrolments are linked to the Ghana Card, so a Ghana Card PIN
+        in a health context is also an NHIS identifier.
+      length: "8 digits"
+      examples_synthetic: ["12345678"]
+    validation_state: VALID_FORMAT
+    evidence_level: issuer_confirmed
+    detection: 8-digit run with NHIS or health-insurance context; Ghana Card PINs in that context get a HEALTH label
+    context_words_en: ["NHIS", "NHIS number", "membership number", "health insurance", "NHIA", "*929#", "MyNHIS"]
+    context_words_local: []
+    false_positive_risks:
+      - Eight-digit dates (20241231), amounts and order numbers.
+    evidence:
+      - url: https://www.nhis.gov.gh/929
+        publisher: National Health Insurance Authority
+        strength: authoritative
+        says: "Dial *929# ... Enter the 8 Digit Membership Number."
+      - url: https://nhis.gov.gh/membership
+        publisher: National Health Insurance Authority
+        strength: authoritative
+        says: "Enrolment uses Ghana Card details; membership is renewed yearly by USSD or the MyNHIS app."
+    checked: "2026-11-04"
+
+  - code: GH_WAEC_INDEX_NUMBER
+    name: WAEC examination (index) number, WASSCE and BECE
+    issuer: West African Examinations Council (WAEC Ghana); Ghana Education Service CSSPS for BECE placement
+    format:
+      description: >-
+        WAEC's results portal defines the examination number as 10 digits: a 7-digit centre number followed
+        by a 3-digit candidate number (8 digits for examinations before 1999). BECE index numbers are also
+        10 digits; for placement and SMS checks the 2-digit examination year is appended, giving 12 digits
+        (the CSSPS re-entry form asks for "your full BECE index number containing 10 to 12 digits").
+      pattern_hint: '\b\d{7}\d{3}(?:\d{2})?\b'
+      length: "10 digits (8 before 1999); 12 with the 2-digit year appended"
+      examples_synthetic: ["4010101001", "401010100124"]
+    validation_state: VALID_FORMAT
+    evidence_level: issuer_confirmed
+    detection: 10 or 12-digit run with exam context (WASSCE, BECE, index number, exam year); never pattern-only
+    context_words_en: ["index number", "index no", "examination number", "WASSCE", "BECE", "WAEC", "candidate number", "centre number", "CSSPS", "placement"]
+    context_words_local: []
+    false_positive_risks:
+      - Ten-digit phone numbers and references; the centre/candidate split carries no checksum.
+    evidence:
+      - url: https://www.waecdirect.org/Default.aspx
+        publisher: West African Examinations Council (results portal)
+        strength: authoritative
+        says: "Enter your 10-digit WAEC Examination Number (your 7-digit centre number followed by your 3-digit candidate number). For examination year < 1999, enter your 8-digit number."
+      - url: https://www.cssps.gov.gh/re-entry
+        publisher: Ghana Education Service, Computerised School Selection and Placement System
+        strength: authoritative
+        says: "Your full BECE index number containing 10 to 12 digits; the year you sat the examination."
+      - url: https://ghstudents.com/cssps-placement-checker
+        publisher: Ghana Students (guide)
+        strength: anecdotal
+        says: "10-digit index number plus the 2-digit year when texting the 1060 short code, e.g. 123456789023."
+    checked: "2026-11-04"
+
+  - code: GH_BIRTH_CERTIFICATE
+    name: Birth certificate / entry number
+    issuer: Births and Deaths Registry
+    format:
+      description: "No published format was found."
+    validation_state: UNVERIFIED
+    evidence_level: unpublished
+    detection: context only
+    context_words_en: ["birth certificate", "entry number", "Births and Deaths Registry"]
+    evidence: []
+
+  - code: GH_IMMIGRATION_ID
+    name: Immigration / residence permit identifier
+    issuer: Ghana Immigration Service; NIA non-citizen card
+    format:
+      description: >-
+        Foreign residents hold an NIA non-citizen card whose PIN follows the Ghana Card structure with the
+        holder's own ISO alpha-3 nationality code. Residence permit numbers have no published format.
+    validation_state: UNVERIFIED
+    evidence_level: issuer_confirmed
+    detection: non-GHA PIN pattern with context; permits by context only
+    context_words_en: ["residence permit", "work permit", "non-citizen card", "immigration"]
+    evidence:
+      - url: https://www.oecd.org/content/dam/oecd/en/topics/policy-issue-focus/aeoi/ghana-tin.pdf
+        publisher: GRA via OECD
+        strength: authoritative
+        says: "The non-citizen card of foreign individuals permanently resident in Ghana serves as their TIN."
+
+  - code: BANK_ACCOUNT_NUMBER
+    name: Ghanaian bank account number
+    issuer: Individual banks; clearing via GhIPSS under Bank of Ghana
+    format:
+      description: >-
+        There is no national account number standard or IBAN. Account numbers are digits only, 8 to 16 digits,
+        most often 13, with no published national checksum. Interbank payments pair the account number with a
+        6-digit sort code (see GH_BANK_SORT_CODE).
+      examples_synthetic: ["1234567890123"]
+    validation_state: UNVERIFIED
+    evidence_level: unpublished
+    detection: context-required digit run (account/acct/a/c number, bank names, sort code nearby); no checksum
+    context_words_en: ["account number", "acct", "a/c", "bank", "sort code", "branch", "transfer to", "GCB", "Ecobank", "Stanbic", "Fidelity", "CalBank", "Absa", "Zenith", "ADB", "Republic Bank", "Access Bank", "UBA", "GTBank", "Prudential", "Consolidated Bank"]
+    false_positive_risks: ["Any 13-digit number; require context."]
+    evidence:
+      - url: https://www.bog.gov.gh/wp-content/uploads/2019/08/Bank-Branch-Sort-Codes-August-2017.pdf
+        publisher: Bank of Ghana
+        strength: authoritative
+        says: "Sort codes are 6 digits identifying the bank, the clearing zone and the branch; account number formats are not specified."
+      - url: https://docs.coverbase.com/user-guides/supplier-countries/gh.md
+        publisher: Coverbase (payments documentation)
+        strength: reputable_secondary
+        says: "Account number 8 to 16 digits; bank code 2 digits; branch code 4 digits."
+    open_question: "Per-bank account number lengths could tighten detection; collect from bank documentation, never from real accounts."
+
+  - code: GH_BANK_SORT_CODE
+    name: Ghanaian bank branch sort code
+    issuer: Bank of Ghana; Ghana Interbank Payment and Settlement Systems (GhIPSS)
+    format:
+      description: >-
+        Six digits in three pairs: bank code, clearing zone, branch (Bank of Ghana's example 01-02-03). The
+        bank code alone is written as the first two digits followed by 0100 in the Bank of Ghana list. A sort
+        code identifies a branch, not a person; it matters because it travels with account numbers and makes
+        an adjacent digit run far more likely to be an account.
+      pattern_hint: '\b(?:0[1-9]|[1-3]\d)[ -]?\d{2}[ -]?\d{2}\b'
+      examples_synthetic: ["13-01-01", "040101"]
+      bank_codes_2017: {"01": "Bank of Ghana", "02": "Standard Chartered Bank", "03": "Barclays Bank", "04": "GCB BANK LTD", "05": "National Investment Bank", "06": "United Bank for Africa", "07": "ARB Apex & Rural Banks", "08": "Agric. Development Bank", "09": "Societe Generale Ghana Ltd", "10": "Universal Merchant Bank (GH) Ltd", "11": "HFC Bank (GH) Ltd", "12": "Zenith Bank (GH) Ltd", "13": "Ecobank (GH) Ltd", "14": "Cal Bank Ltd", "17": "First Atlantic Bank", "18": "Prudential Bank Ltd.", "19": "Stanbic Bank Ghana Ltd", "20": "FBN Bank Ghana", "21": "Bank of Africa -Ghana Ltd", "22": "Unibank Ghana Ltd", "23": "Guaranty Trust (Gh) Ltd.", "24": "Fidelity Bank Ghana Ltd", "26": "Bank Of Baroda (Gh) Ltd.", "27": "BSIC Ghana Ltd.", "28": "Access Bank CHG", "29": "Energy Bank CHG", "30": "The Royal Bank CHG", "32": "GN Bank Ltd", "33": "First National Bank", "34": "Sovereign Bank LTD"}
+    validation_state: VALID_FORMAT
+    evidence_level: issuer_confirmed
+    validation_note: "Validate the bank code against the published list; zone and branch need the full branch table."
+    detection: context only (sort code, branch, bank names); used mainly as a context signal for BANK_ACCOUNT_NUMBER
+    context_words_en: ["sort code", "branch code", "bank code", "GhIPSS"]
+    sensitivity_note: "Organisational identifier, not personal data on its own."
+    evidence:
+      - url: https://www.bog.gov.gh/wp-content/uploads/2019/08/Bank-Branch-Sort-Codes-August-2017.pdf
+        publisher: Bank of Ghana
+        date: "2017-08"
+        strength: authoritative
+        says: "A 6-digit unique sort code is assigned to each bank branch: first two digits the bank's code, next two the clearing zone, last two the branch."
+      - url: https://ghipss.net/bank-sort-codes/
+        publisher: GhIPSS
+        strength: authoritative
+        says: "Current clearing house sort codes per bank."
+    open_question: "The 2017 list predates bank mergers and closures (for example Barclays became Absa, HFC became Republic); refresh from GhIPSS."
+    checked: "2026-11-04"
+
+  - code: GH_MOMO_MERCHANT_ID
+    name: Mobile money merchant (MoMoPay) code
+    issuer: Mobile money operators (MTN MoMo, Telecel Cash, AT Money)
+    format:
+      description: >-
+        A short numeric code a business is paid through, entered after the operator's USSD menu (*170# for MTN
+        MoMo, *110# for Telecel Cash and AT Money). Reported as 5 to 7 digits, with MTN describing six. It
+        identifies a business, and for sole traders can identify a person.
+      length: "5 to 7 digits (reported)"
+      examples_synthetic: ["123456"]
+    validation_state: UNVERIFIED
+    evidence_level: secondary
+    detection: context only (merchant ID, MoMo Pay, pay to merchant, USSD codes nearby)
+    context_words_en: ["merchant ID", "merchant code", "MoMo Pay", "MoMoPay", "pay merchant", "*170#", "*110#", "till number"]
+    evidence:
+      - url: https://www.maxmegroup.com/learn/momo-merchant-account-ghana
+        publisher: Maxme Group (citing an MTN statement, 2023)
+        strength: reputable_secondary
+        says: "A customer pays an MTN merchant by dialling *170# and choosing MoMo Pay & Pay Bill; the merchant ID is a six-digit code."
+      - url: https://momocalc.com/ghana/momo-merchant-code
+        publisher: MoMoCalc
+        strength: anecdotal
+        says: "MoMoPay merchant codes are 5 to 7 digits; Telecel Cash and AT Money share *110#."
+    checked: "2026-11-04"
+

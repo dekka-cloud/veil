@@ -1,0 +1,8 @@
+{"input": "Please call 024 123 4567", "output": "Please call 024 *** 4567", "note": "phone numbers are masked"}
+{"input": "Home line 0302 123 456", "output": "Home line 0302 *** 456", "note": "fixed lines keep their area code"}
+{"input": "Write to ama@example.com", "output": "Write to [EMAIL_ADDRESS]", "note": "other personal details are redacted"}
+{"input": "Digital address GA-543-0125", "output": "Digital address [GH_DIGITAL_ADDRESS]", "note": "digital addresses are redacted"}
+{"input": "My Ghana Card is GHA-723451904-3", "blocked": true, "note": "Ghana Card PINs block the request"}
+{"input": "use key AK\u0049A2E3A7FQB4ZXC6DWY", "blocked": true, "note": "credentials block the request"}
+{"input": "DB_PASSWORD=Tr0ub4dor in the config", "blocked": true, "note": "password assignments block the request"}
+{"input": "Nothing personal here.", "output": "Nothing personal here.", "blocked": false, "note": "clean text passes unchanged"}

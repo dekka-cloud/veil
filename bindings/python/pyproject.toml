@@ -1,0 +1,38 @@
+[build-system]
+requires = ["maturin>=1.9,<2"]
+build-backend = "maturin"
+
+[project]
+name = "dekka-veil"
+description = "Find and protect personal information in text, with Ghana-aware rules and an optional local model"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+requires-python = ">=3.10"
+authors = [{ name = "Dekka" }]
+keywords = ["pii", "privacy", "redaction", "anonymization", "data-protection", "ghana", "ner"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Rust",
+    "Topic :: Security",
+    "Topic :: Text Processing",
+    "Typing :: Typed",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://dekka.cloud/veil"
+Repository = "https://github.com/dekka-cloud/veil"
+Issues = "https://github.com/dekka-cloud/veil/issues"
+
+[tool.maturin]
+python-source = "python"
+module-name = "dekka_veil._veil"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

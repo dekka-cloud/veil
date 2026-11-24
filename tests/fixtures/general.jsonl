@@ -1,0 +1,13 @@
+{"text": "Write to ama.mensah@example.com today", "expect": [{"entity": "EMAIL_ADDRESS", "value": "ama.mensah@example.com"}], "note": "email"}
+{"text": "Email: kofi+veil@mail.example.org.", "expect": [{"entity": "EMAIL_ADDRESS", "value": "kofi+veil@mail.example.org"}], "note": "plus addressing and subdomain, before a full stop"}
+{"text": "Card 4111 1111 1111 1111 expires soon", "expect": [{"entity": "PAYMENT_CARD_PAN", "value": "4111 1111 1111 1111"}], "note": "Visa test number with spaces"}
+{"text": "Pay with 5555-5555-5555-4444", "expect": [{"entity": "PAYMENT_CARD_PAN", "value": "5555-5555-5555-4444"}], "note": "Mastercard test number with hyphens"}
+{"text": "Amex 378282246310005 on file", "expect": [{"entity": "PAYMENT_CARD_PAN", "value": "378282246310005"}], "note": "Amex test number"}
+{"text": "Server 10.0.0.12.", "expect": [{"entity": "IP_ADDRESS", "value": "10.0.0.12"}], "note": "IPv4 before a full stop"}
+{"text": "Host 2001:db8::8a2e:370:7334 is up", "expect": [{"entity": "IP_ADDRESS", "value": "2001:db8::8a2e:370:7334"}], "note": "IPv6 documentation address"}
+{"text": "Order 4111 1111 1111 1112 failed", "expect": [], "note": "fails Luhn"}
+{"text": "Tracking 1234 5678 9012 3456", "expect": [], "note": "passes no network prefix check"}
+{"text": "Version 1.2.3.4.5 released", "expect": [], "note": "dotted version number"}
+{"text": "Meeting at 12:30:45 today", "expect": [], "note": "clock time is not IPv6"}
+{"text": "Value 999.1.1.1 is invalid", "expect": [], "note": "not a valid IPv4 address"}
+{"text": "Contact @ama or ama at example dot com", "expect": [], "note": "handles and spelled-out email are out of scope"}

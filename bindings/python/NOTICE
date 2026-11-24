@@ -1,0 +1,31 @@
+Dekka Veil
+Copyright 2026 Dekka
+
+This product is licensed under the Apache License, Version 2.0, and includes data from
+the following sources.
+
+libphonenumber
+  country-packs/gh/numbering.toml holds Ghana's mobile and fixed-line number patterns from
+  Google's libphonenumber metadata, release v9.0.42.
+  Copyright (C) 2009 The Libphonenumber Authors. Licensed under the Apache License, Version 2.0.
+  https://github.com/google/libphonenumber
+
+Unicode CLDR
+  country-packs/gh/spoken-digits.toml uses the Akan and Ewe spell-out rules from the Unicode
+  Common Locale Data Repository.
+  Copyright (C) 1991-2026 Unicode, Inc. Licensed under the Unicode License v3.
+  https://github.com/unicode-org/cldr
+
+Mozilla Common Voice
+  Asante Twi counting forms in country-packs/gh/spoken-digits.toml are attested in Common
+  Voice Twi sentences, released under CC0.
+  https://commonvoice.mozilla.org
+
+GhanaPost GPS
+  country-packs/gh/digital-address.toml lists the region and district codes GhanaPostGPS
+  publishes, used only to check the shape of a digital address.
+  https://www.ghanapostgps.com/regions-and-district-codes/
+
+The identifier formats in country-packs/gh/identifiers.yaml cite their published sources
+inline. Veil's models are separate works, released under CC BY 4.0 on Hugging Face, and
+their cards credit the data they were trained on.
