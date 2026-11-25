@@ -1,6 +1,6 @@
 {
   "name": "dekka-veil",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Find and protect personal information in text, with Ghana-aware rules and an optional local model, in Node.js and the browser",
   "license": "Apache-2.0",
   "author": "Dekka",

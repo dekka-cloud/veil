@@ -276,7 +276,7 @@ dependencies = [
 
 [[package]]
 name = "dekka-veil-node"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "napi",
  "napi-build",
@@ -288,7 +288,7 @@ dependencies = [
 
 [[package]]
 name = "dekka-veil-python"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "pyo3",
  "serde",
@@ -1702,7 +1702,7 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "veil"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "proptest",
  "serde",
@@ -1718,7 +1718,7 @@ dependencies = [
 
 [[package]]
 name = "veil-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "proptest",
  "serde",
@@ -1728,7 +1728,7 @@ dependencies = [
 
 [[package]]
 name = "veil-country-packs"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "proptest",
  "regex",
@@ -1742,7 +1742,7 @@ dependencies = [
 
 [[package]]
 name = "veil-detectors"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "regex",
  "veil-core",
@@ -1750,7 +1750,7 @@ dependencies = [
 
 [[package]]
 name = "veil-inference"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "ort",
  "serde",
@@ -1764,7 +1764,7 @@ dependencies = [
 
 [[package]]
 name = "veil-policy"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "proptest",
  "serde",
@@ -1776,7 +1776,7 @@ dependencies = [
 
 [[package]]
 name = "veil-wasm"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "js-sys",
  "serde",
