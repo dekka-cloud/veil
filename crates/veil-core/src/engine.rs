@@ -128,7 +128,8 @@ impl Engine {
     /// Runs detection with `profile`. Any rule's failure fails the whole call, so a caller
     /// that enforces privacy never mistakes a partial scan for a complete one. If the model
     /// fails, the rules' result is returned with `profile_used: rules` and a warning saying
-    /// the model didn't run, which a caller can treat as it treats the rules fallback.
+    /// the model didn't run, which a caller can treat as it treats the rules fallback. A
+    /// scan cancelled through [`crate::Cancel`] fails as a whole in either part.
     pub fn detect_with(
         &self,
         text: &str,
@@ -204,6 +205,9 @@ impl Engine {
                 limit: self.config.max_input_bytes,
             });
         }
+        if crate::cancel::cancelled() {
+            return Err(VeilError::Cancelled);
+        }
         let normalized = if self.config.normalize {
             crate::normalize::Normalized::of(text)
         } else {
@@ -212,6 +216,9 @@ impl Engine {
         let scan: &str = normalized.as_ref().map_or(text, |n| n.text.as_str());
         let mut candidates = Vec::new();
         for detector in self.registry.detectors() {
+            if crate::cancel::cancelled() {
+                return Err(VeilError::Cancelled);
+            }
             let info = detector.info();
             if let Some(j) = &info.jurisdiction {
                 if !context.wants_country(j.as_str()) {

@@ -187,6 +187,20 @@ fn enforcement_decides_what_a_failed_scan_does() {
 }
 
 #[test]
+fn a_cancelled_scan_fails_even_under_open_enforcement() {
+    let veil = Veil::builder().country("gh").build().unwrap();
+    let policy = Policy::builtin("default-protection").unwrap();
+    let mut req = request(&["Call 024 123 4567", "and 020 765 4321"], None);
+    req.enforcement = Some(Enforcement::Open);
+    let cancel = veil::Cancel::new();
+    cancel.cancel();
+    assert!(matches!(
+        cancel.scope(|| veil.protect_segments(&req, &policy, false)),
+        Err(ApiError::ScanFailed(_))
+    ));
+}
+
+#[test]
 fn the_taxonomy_describes_every_entity_a_detector_reports() {
     let veil = Veil::builder().build().unwrap();
     let known: Vec<String> = api::entities().into_iter().map(|e| e.code).collect();

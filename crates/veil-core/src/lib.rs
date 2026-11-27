@@ -5,6 +5,7 @@
 //! where (as a [`Span`] of the original text), by which detector, and how strongly it was
 //! validated. It never carries the matched text, so findings are safe to log.
 
+pub mod cancel;
 pub mod context;
 pub mod detector;
 pub mod engine;
@@ -14,6 +15,7 @@ pub mod finding;
 pub mod normalize;
 pub mod span;
 
+pub use cancel::Cancel;
 pub use context::DetectionContext;
 pub use detector::{DetectionMethod, Detector, DetectorInfo, Registry};
 pub use engine::{DetectionResult, Engine, EngineConfig, Profile, STRUCTURED};

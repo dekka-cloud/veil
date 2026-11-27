@@ -34,4 +34,6 @@ pub enum VeilError {
     UnsupportedCountry(String),
     #[error("the {0:?} profile needs a model, and none is configured")]
     ProfileUnavailable(crate::engine::Profile),
+    #[error("the scan was cancelled")]
+    Cancelled,
 }
