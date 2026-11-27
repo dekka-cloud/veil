@@ -6,6 +6,7 @@ use std::sync::Mutex;
 use ort::session::builder::GraphOptimizationLevel;
 use ort::session::Session;
 use ort::value::Tensor;
+use veil_core::cancel::cancelled;
 use veil_core::{DetectionContext, DetectionError, Detector, DetectorInfo, Finding};
 
 use crate::decode::Prediction;
@@ -92,6 +93,8 @@ impl Model {
     }
 
     /// Spans the model finds in `text`, at or above the manifest's threshold, as byte offsets.
+    /// A long text is many batches, so a scan cancelled through [`veil_core::Cancel`] stops
+    /// before the next one.
     pub fn predict(&self, text: &str) -> Result<Vec<Prediction>, ModelError> {
         let plan = self.pipeline.plan(text)?;
         if plan.is_empty() {
@@ -107,6 +110,11 @@ impl Model {
                 .session
                 .lock()
                 .map_err(|_| ModelError::Onnx("a previous inference panicked".into()))?;
+            // Looked at with the session in hand, because a scan that shares the model
+            // spends its time waiting here and may have been cancelled meanwhile.
+            if cancelled() {
+                return Err(ModelError::Cancelled);
+            }
             let outputs = session
                 .run(ort::inputs!["input_ids" => ids, "attention_mask" => mask])
                 .map_err(onnx)?;

@@ -12,7 +12,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use veil_core::{DetectionContext, Detector};
+use veil_core::{Cancel, DetectionContext, Detector};
 use veil_inference::{Model, ModelDetector, ModelError, Options};
 
 fn fixture() -> PathBuf {
@@ -160,4 +160,16 @@ fn real_model_finds_a_ghanaian_name() {
             .any(|p| p.label == "PERSON_NAME" && text[p.start..p.end].contains("Abena")),
         "{got:?}"
     );
+}
+
+#[test]
+fn a_cancelled_scan_runs_no_more_batches() {
+    let (model, cancel) = (load(), Cancel::new());
+    let text = "call Ama Mensah , Kofi lives in Osu .";
+    assert!(cancel.scope(|| model.predict(text)).is_ok());
+    cancel.cancel();
+    assert!(matches!(
+        cancel.scope(|| model.predict(text)),
+        Err(ModelError::Cancelled)
+    ));
 }

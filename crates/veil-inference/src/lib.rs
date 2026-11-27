@@ -53,6 +53,8 @@ pub enum ModelError {
     Onnx(String),
     #[error("tokenizer: {0}")]
     Tokenizer(String),
+    #[error("the scan was cancelled")]
+    Cancelled,
 }
 
 /// Inference settings that belong to the host rather than the model.

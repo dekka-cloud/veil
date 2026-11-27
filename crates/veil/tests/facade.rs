@@ -77,6 +77,15 @@ fn open_lets_text_through_with_a_warning() {
 }
 
 #[test]
+fn open_never_lets_a_cancelled_scan_through() {
+    let veil = Veil::builder().policy(policy("open")).build().unwrap();
+    let cancel = veil::Cancel::new();
+    cancel.cancel();
+    let out = cancel.scope(|| veil.protect("call 024 123 4567 please", &PolicyContext::default()));
+    assert!(matches!(out, Err(veil::VeilError::Cancelled)));
+}
+
+#[test]
 fn rules_fallback_runs_the_rules_and_says_so() {
     let veil = Veil::builder()
         .policy(policy("rules_fallback"))

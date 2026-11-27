@@ -30,7 +30,7 @@ use std::path::PathBuf;
 use thiserror::Error;
 use veil_core::Registry;
 pub use veil_core::{
-    DetectionContext, DetectionError, DetectionResult, Detector, DetectorInfo, Engine,
+    Cancel, DetectionContext, DetectionError, DetectionResult, Detector, DetectorInfo, Engine,
     EngineConfig, Finding, Profile, VeilError,
 };
 pub use veil_country_packs::{PackError, PACKS};
@@ -237,7 +237,8 @@ impl Veil {
         self.engine.supports(profile)
     }
 
-    /// Detects, decides and transforms. A failed scan follows the policy's `on_failure`.
+    /// Detects, decides and transforms. A failed scan follows the policy's `on_failure`,
+    /// and one cancelled through [`Cancel`] is an error.
     pub fn protect(&self, text: &str, ctx: &PolicyContext) -> Result<Outcome, VeilError> {
         let mut warnings = Vec::new();
         let detection = match self.engine.detect_with(text, &self.context, self.profile) {
@@ -248,9 +249,13 @@ impl Veil {
                 warnings.push(format!("the {p:?} profile is unavailable, so only the rules ran; this is not a complete hybrid scan"));
                 match self.engine.detect_with(text, &self.context, Profile::Rules) {
                     Ok(d) => d,
+                    Err(VeilError::Cancelled) => return Err(VeilError::Cancelled),
                     Err(e) => return Ok(self.failed(text, &e, warnings)),
                 }
             }
+            // A cancelled scan is an error under every `on_failure`, so the text is never
+            // handed back as though the policy had let it through.
+            Err(VeilError::Cancelled) => return Err(VeilError::Cancelled),
             Err(e) => return Ok(self.failed(text, &e, warnings)),
         };
         let mut applied = self.policy.protect(text, &detection.findings, ctx)?;
@@ -316,6 +321,11 @@ impl Veil {
                 Ok(d) => Some(d),
                 Err(VeilError::InputTooLarge { size, limit }) => {
                     return Err(ApiError::InputTooLarge { size, limit })
+                }
+                // Whoever cancelled has stopped waiting, so no enforcement mode carries on
+                // to the segments that are left.
+                Err(VeilError::Cancelled) => {
+                    return Err(ApiError::ScanFailed(VeilError::Cancelled.to_string()))
                 }
                 Err(VeilError::ProfileUnavailable(p))
                     if enforcement == Enforcement::RulesFallback =>
